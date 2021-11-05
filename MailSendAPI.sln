@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31515.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MailSendAPI", "MailSendAPI\MailSendAPI.csproj", "{450754BD-BA3D-46B7-B301-20A360D9A502}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{158B811F-1749-4C6F-96F6-F7076E85718A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{07D92100-E6D1-4A1E-AA4F-5FB8025AC38D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{450754BD-BA3D-46B7-B301-20A360D9A502}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{450754BD-BA3D-46B7-B301-20A360D9A502}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{450754BD-BA3D-46B7-B301-20A360D9A502}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{450754BD-BA3D-46B7-B301-20A360D9A502}.Release|Any CPU.Build.0 = Release|Any CPU
+		{158B811F-1749-4C6F-96F6-F7076E85718A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{158B811F-1749-4C6F-96F6-F7076E85718A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{158B811F-1749-4C6F-96F6-F7076E85718A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{158B811F-1749-4C6F-96F6-F7076E85718A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07D92100-E6D1-4A1E-AA4F-5FB8025AC38D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07D92100-E6D1-4A1E-AA4F-5FB8025AC38D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07D92100-E6D1-4A1E-AA4F-5FB8025AC38D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07D92100-E6D1-4A1E-AA4F-5FB8025AC38D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3B8FEFEB-74BA-46D8-9C36-C84B983234BB}
+	EndGlobalSection
+EndGlobal
