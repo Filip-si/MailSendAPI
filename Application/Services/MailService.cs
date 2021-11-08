@@ -5,7 +5,6 @@ using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
@@ -34,7 +33,7 @@ namespace Application.Services
           request.Body);
         message.BodyEncoding = Encoding.UTF8;
         message.IsBodyHtml = true;
-        await smtpClient().SendMailAsync(message);
+        await GetSmtpClientConfig().SendMailAsync(message);
       }
       catch (Exception)
       {
@@ -56,8 +55,8 @@ namespace Application.Services
         mailMessage.CC.Add(recepients);
         mailMessage.Subject = mailMessageTemplate.Subject;
         mailMessage.Body = mailMessageTemplate.Body;
-
-        await smtpClient().SendMailAsync(mailMessage);
+        mailMessage.DeliveryNotificationOptions = DeliveryNotificationOptions.OnSuccess | DeliveryNotificationOptions.OnFailure; // need?
+        await GetSmtpClientConfig().SendMailAsync(mailMessage);
       }
       catch (Exception)
       {
@@ -65,12 +64,13 @@ namespace Application.Services
       }
     }
 
-    private SmtpClient smtpClient()
+    private SmtpClient GetSmtpClientConfig()
     {
       SmtpClient client = new(_configuration["EmailConfigurations:Host"], int.Parse(_configuration["EmailConfigurations:Port"]));
       NetworkCredential creds = new(_configuration["EmailConfigurations:From"], _configuration["EmailConfigurations:Password"]);
       client.EnableSsl = bool.Parse(_configuration["EmailConfigurations:EnableSsl"]);
       client.UseDefaultCredentials = bool.Parse(_configuration["EmailConfigurations:UseDefaultCredentials"]);
+      client.DeliveryMethod = SmtpDeliveryMethod.Network;
       client.Credentials = creds;
       return client;
     }

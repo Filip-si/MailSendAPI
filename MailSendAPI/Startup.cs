@@ -1,6 +1,6 @@
 using Application.IServices;
 using Application.Services;
-using Infrastructure;
+using Infrastructure.Exceptions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +8,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Infrastructure;
+using Infrastructure.Logger;
 
 namespace MailSendAPI
 {
@@ -16,9 +19,14 @@ namespace MailSendAPI
     public Startup(IConfiguration configuration)
     {
       Configuration = configuration;
+
+      Logger = LoggerConfigurationService.CreateLogger(Configuration);
+      Logger.Information("Logger configured");
     }
 
     public IConfiguration Configuration { get; }
+
+    protected readonly ILogger Logger;
 
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
@@ -26,7 +34,10 @@ namespace MailSendAPI
       services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
       services.AddScoped<IMailService, MailService>();
       services.AddScoped<IMailTemplateService, MailTemplateService>();
-      services.AddControllers();
+      services.AddControllers(opt =>
+      {
+        opt.Filters.Add(new BusinessExceptionFilter(Logger));
+      });
       services.AddSwaggerGen(c =>
       {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "MailSendAPI", Version = "v1" });

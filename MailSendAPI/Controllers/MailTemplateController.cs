@@ -25,9 +25,8 @@ namespace MailSendAPI.Controllers
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesDefaultResponseType(typeof(IEnumerable<MailMessageTemplate>))]
     public async Task<IActionResult> GetMailMessageTemplates()
-    {
-      await _mailTemplateService.GetMailMessageTemplates();
-      return StatusCode(StatusCodes.Status200OK);
+    {      
+      return Ok(await _mailTemplateService.GetMailMessageTemplates());
     }
 
     [HttpPost]
