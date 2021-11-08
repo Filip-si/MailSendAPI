@@ -1,8 +1,10 @@
 ﻿using Application.IServices;
 using Application.Models;
+using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MailSendAPI.Controllers
@@ -21,6 +23,7 @@ namespace MailSendAPI.Controllers
     [HttpGet]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesDefaultResponseType(typeof(IEnumerable<MailMessageTemplate>))]
     public async Task<IActionResult> GetMailMessageTemplates()
     {
       await _mailTemplateService.GetMailMessageTemplates();

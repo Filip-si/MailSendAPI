@@ -8,6 +8,7 @@ namespace Application.IServices
   {
     Task SendMailMessage(MailRequest request);
 
-    Task SendMailMessageByTemplate(Guid mailMessageTemplateId, string to);
+
+    Task SendMailMessageByTemplate(Guid mailMessageTemplateId, string recepients);
   }
 }

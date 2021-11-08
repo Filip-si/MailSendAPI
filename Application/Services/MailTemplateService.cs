@@ -2,12 +2,10 @@
 using Application.Models;
 using Domain.Entities;
 using Infrastructure;
-using Infrastructure.Exceptions;
 using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -21,11 +19,10 @@ namespace Application.Services
       _context = context;
     }
 
-    public async Task<List<MailMessageTemplate>> GetMailMessageTemplates()
+    public async Task<IEnumerable<MailMessageTemplate>> GetMailMessageTemplates()
     {
-      var x = await _context.MailMessageTemplates.AsNoTracking()
+      return await _context.MailMessageTemplates.AsNoTracking()
         .ToListAsync();
-      return x;
     }
 
     public async Task<Guid> AddMailMessageTemplate(MailMessageTemplateRequest template)

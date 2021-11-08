@@ -5,6 +5,7 @@ using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
@@ -41,7 +42,7 @@ namespace Application.Services
       }
     }
 
-    public async Task SendMailMessageByTemplate(Guid mailMessageTemplateId, string to)
+    public async Task SendMailMessageByTemplate(Guid mailMessageTemplateId, string recepients)
     {
       try
       {
@@ -49,19 +50,19 @@ namespace Application.Services
           .IsAnyRuleAsync(x => x.MailMessageTemplateId == mailMessageTemplateId);
 
         var mailMessageTemplate = await _context.MailMessageTemplates.SingleAsync(x => x.MailMessageTemplateId == mailMessageTemplateId);
-        MailMessage message = new(
-          _configuration["EmailConfigurations:From"],
-          to,
-          mailMessageTemplate.Subject,
-          mailMessageTemplate.Body);
-        await smtpClient().SendMailAsync(message);
+
+        MailMessage mailMessage = new();
+        mailMessage.From = new MailAddress(_configuration["EmailConfigurations:From"]);
+        mailMessage.CC.Add(recepients);
+        mailMessage.Subject = mailMessageTemplate.Subject;
+        mailMessage.Body = mailMessageTemplate.Body;
+
+        await smtpClient().SendMailAsync(mailMessage);
       }
       catch (Exception)
       {
-
         throw;
       }
-
     }
 
     private SmtpClient smtpClient()

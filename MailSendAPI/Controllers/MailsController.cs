@@ -27,13 +27,12 @@ namespace MailSendAPI.Controllers
       return StatusCode(StatusCodes.Status202Accepted);
     }
 
-
     [HttpPost("{mailMessageTemplateId}")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
-    public async Task<IActionResult> SendMailMessageByTemplate(Guid mailMessageTemplateId , [FromBody] string to)
+    public async Task<IActionResult> SendMailMessageByTemplate(Guid mailMessageTemplateId, string recepients)
     {
-      await _mailService.SendMailMessageByTemplate(mailMessageTemplateId, to);
+      await _mailService.SendMailMessageByTemplate(mailMessageTemplateId, recepients);
       return StatusCode(StatusCodes.Status202Accepted);
     }
   }
