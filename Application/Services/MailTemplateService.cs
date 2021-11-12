@@ -6,6 +6,7 @@ using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -13,10 +14,12 @@ namespace Application.Services
   public class MailTemplateService : IMailTemplateService
   {
     private readonly DatabaseContext _context;
+    private readonly IFileService _fileService;
 
-    public MailTemplateService(DatabaseContext context)
+    public MailTemplateService(DatabaseContext context, IFileService fileService)
     {
       _context = context;
+      _fileService = fileService;
     }
 
     public async Task<IEnumerable<MailMessageTemplate>> GetMailMessageTemplates()
@@ -27,28 +30,60 @@ namespace Application.Services
 
     public async Task<Guid> AddMailMessageTemplate(MailMessageTemplateRequest template)
     {
-      MailMessageTemplate mail = new()
+      await using var transaction = await _context.Database.BeginTransactionAsync();
+      try
       {
-        Subject = template.Subject,
-        Body = template.Body
-      };
+        MailMessageTemplate mail = new()
+        {
+          Subject = template.Subject,
+          Body = template.Body
+        };
 
-      await _context.AddAsync(mail);
-      await _context.SaveChangesAsync();
+        await _context.AddAsync(mail);
+        await _context.SaveChangesAsync();
 
-      return mail.MailMessageTemplateId;    
+        foreach (var file in template.Files)
+        {
+          await _fileService.UploadFiles(file, mail.MailMessageTemplateId);
+        }
+
+        await transaction.CommitAsync();
+        return mail.MailMessageTemplateId;
+      }
+      catch (Exception)
+      {
+        await transaction.RollbackAsync();
+        throw;
+      }
+
     }
 
-    public async Task DeleteMailMessageTemplate(Guid mailMessageTemplateId)
+    public async Task DeleteMailMessageTemplate(Guid templateId)
     {
-      await _context.MailMessageTemplates
+      await using var transaction = await _context.Database.BeginTransactionAsync();
+      try
+      {
+        await _context.MailMessageTemplates
         .AsNoTracking()
-        .IsAnyRuleAsync(x => x.MailMessageTemplateId == mailMessageTemplateId);
+        .IsAnyRuleAsync(x => x.MailMessageTemplateId == templateId);
 
-      var mailMessageTemplate = await _context.MailMessageTemplates.SingleAsync(x => x.MailMessageTemplateId == mailMessageTemplateId);
+        if(await _context.Files.AnyAsync(x => x.MailMessageTemplateId == templateId))
+        {
+          var listOfFiles = await _context.Files.Where(x => x.MailMessageTemplateId == templateId).ToListAsync();
+          _context.RemoveRange(listOfFiles);
+        }
 
-      _context.Remove(mailMessageTemplate);
-      await _context.SaveChangesAsync();
+        var mailMessageTemplate = await _context.MailMessageTemplates.SingleAsync(x => x.MailMessageTemplateId == templateId);
+
+        _context.Remove(mailMessageTemplate);
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+      }
+      catch (Exception)
+      {
+        await transaction.RollbackAsync();
+        throw;
+      }
     }
   }
 }

@@ -12,6 +12,6 @@ namespace Application.IServices
 
     Task<Guid> AddMailMessageTemplate(MailMessageTemplateRequest template);
 
-    Task DeleteMailMessageTemplate(Guid mailMessageTemplateId);
+    Task DeleteMailMessageTemplate(Guid templateId);
   }
 }

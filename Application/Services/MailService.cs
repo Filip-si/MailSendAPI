@@ -5,6 +5,8 @@ using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
@@ -33,7 +35,7 @@ namespace Application.Services
           request.Body);
         message.BodyEncoding = Encoding.UTF8;
         message.IsBodyHtml = true;
-        await GetSmtpClientConfig().SendMailAsync(message);
+        await SmtpClientConfig().SendMailAsync(message);
       }
       catch (Exception)
       {
@@ -41,30 +43,35 @@ namespace Application.Services
       }
     }
 
-    public async Task SendMailMessageByTemplate(Guid mailMessageTemplateId, string recepients)
+    public async Task SendMailMessageByTemplate(Guid templateId, string recepients)
     {
-      try
-      {
-        await _context.MailMessageTemplates.AsNoTracking()
-          .IsAnyRuleAsync(x => x.MailMessageTemplateId == mailMessageTemplateId);
+      await _context.MailMessageTemplates.AsNoTracking()
+        .IsAnyRuleAsync(x => x.MailMessageTemplateId == templateId);
 
-        var mailMessageTemplate = await _context.MailMessageTemplates.SingleAsync(x => x.MailMessageTemplateId == mailMessageTemplateId);
+      await _context.Files.AsNoTracking()
+        .IsAnyRuleAsync(x => x.MailMessageTemplateId == templateId);
 
-        MailMessage mailMessage = new();
-        mailMessage.From = new MailAddress(_configuration["EmailConfigurations:From"]);
-        mailMessage.CC.Add(recepients);
-        mailMessage.Subject = mailMessageTemplate.Subject;
-        mailMessage.Body = mailMessageTemplate.Body;
-        mailMessage.DeliveryNotificationOptions = DeliveryNotificationOptions.OnSuccess | DeliveryNotificationOptions.OnFailure; // need?
-        await GetSmtpClientConfig().SendMailAsync(mailMessage);
-      }
-      catch (Exception)
+      var mailMessageTemplate = await _context.MailMessageTemplates.SingleAsync(x => x.MailMessageTemplateId == templateId);
+
+      MailMessage mailMessage = new();
+      mailMessage.From = new MailAddress(_configuration["EmailConfigurations:From"]);
+      mailMessage.CC.Add(recepients);
+      mailMessage.Subject = mailMessageTemplate.Subject;
+      mailMessage.Body = mailMessageTemplate.Body;
+
+      var attachments = await _context.Files
+        .Where(x => x.MailMessageTemplateId == templateId)
+        .ToListAsync();
+      foreach (var file in attachments)
       {
-        throw;
+        Stream stream = new MemoryStream(file.DataFiles);
+        mailMessage.Attachments.Add(new Attachment(stream, file.FileName));
       }
+
+      await SmtpClientConfig().SendMailAsync(mailMessage);
     }
 
-    private SmtpClient GetSmtpClientConfig()
+    private SmtpClient SmtpClientConfig()
     {
       SmtpClient client = new(_configuration["EmailConfigurations:Host"], int.Parse(_configuration["EmailConfigurations:Port"]));
       NetworkCredential creds = new(_configuration["EmailConfigurations:From"], _configuration["EmailConfigurations:Password"]);

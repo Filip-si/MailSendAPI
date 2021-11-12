@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Domain.Entities
 {
@@ -9,5 +10,7 @@ namespace Domain.Entities
     public string Subject { get; set; }
 
     public string Body { get; set; }
+
+    public virtual ICollection<File> Files { get; set; }
   }
 }

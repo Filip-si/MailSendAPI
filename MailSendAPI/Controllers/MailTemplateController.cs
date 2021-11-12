@@ -30,21 +30,20 @@ namespace MailSendAPI.Controllers
     }
 
     [HttpPost]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesDefaultResponseType(typeof(Guid))]
-    public async Task<IActionResult> AddMailMessageTemplate(MailMessageTemplateRequest template)
+    public async Task<IActionResult> AddMailMessageTemplate([FromForm] MailMessageTemplateRequest template)
     {
       var mailMessageTemplateId = await _mailTemplateService.AddMailMessageTemplate(template);
-      return StatusCode(StatusCodes.Status201Created, mailMessageTemplateId);
+      return StatusCode(StatusCodes.Status201Created);
     }
 
-    [HttpDelete("{mailMessageTemplateId}")]
+    [HttpDelete("{templateId}")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> DeleteMailMessageTemplate(Guid mailMessageTemplateId)
+    public async Task<IActionResult> DeleteMailMessageTemplate(Guid templateId)
     {
-      await _mailTemplateService.DeleteMailMessageTemplate(mailMessageTemplateId);
+      await _mailTemplateService.DeleteMailMessageTemplate(templateId);
       return StatusCode(StatusCodes.Status204NoContent);
     }
 
