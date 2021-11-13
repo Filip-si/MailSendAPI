@@ -1,6 +1,7 @@
 ﻿using Application.IServices;
 using Application.Models;
 using Infrastructure;
+using Infrastructure.Exceptions;
 using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -48,8 +49,10 @@ namespace Application.Services
       await _context.MailMessageTemplates.AsNoTracking()
         .IsAnyRuleAsync(x => x.MailMessageTemplateId == templateId);
 
-      await _context.Files.AsNoTracking()
-        .IsAnyRuleAsync(x => x.MailMessageTemplateId == templateId);
+      if(recepients == null)
+      {
+        throw new BusinessException("Recepients not found");
+      }
 
       var mailMessageTemplate = await _context.MailMessageTemplates.SingleAsync(x => x.MailMessageTemplateId == templateId);
 
@@ -59,13 +62,16 @@ namespace Application.Services
       mailMessage.Subject = mailMessageTemplate.Subject;
       mailMessage.Body = mailMessageTemplate.Body;
 
-      var attachments = await _context.Files
-        .Where(x => x.MailMessageTemplateId == templateId)
-        .ToListAsync();
-      foreach (var file in attachments)
+      if (mailMessageTemplate.Files != null)
       {
-        Stream stream = new MemoryStream(file.DataFiles);
-        mailMessage.Attachments.Add(new Attachment(stream, file.FileName));
+        var attachments = await _context.Files
+          .Where(x => x.MailMessageTemplateId == templateId)
+          .ToListAsync();
+        foreach (var file in attachments)
+        {
+          Stream stream = new MemoryStream(file.DataFiles);
+          mailMessage.Attachments.Add(new Attachment(stream, file.FileName));
+        }
       }
 
       await SmtpClientConfig().SendMailAsync(mailMessage);

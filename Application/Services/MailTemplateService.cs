@@ -3,9 +3,11 @@ using Application.Models;
 using Domain.Entities;
 using Infrastructure;
 using Infrastructure.Extensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,12 +16,10 @@ namespace Application.Services
   public class MailTemplateService : IMailTemplateService
   {
     private readonly DatabaseContext _context;
-    private readonly IFileService _fileService;
 
-    public MailTemplateService(DatabaseContext context, IFileService fileService)
+    public MailTemplateService(DatabaseContext context)
     {
       _context = context;
-      _fileService = fileService;
     }
 
     public async Task<IEnumerable<MailMessageTemplate>> GetMailMessageTemplates()
@@ -42,9 +42,12 @@ namespace Application.Services
         await _context.AddAsync(mail);
         await _context.SaveChangesAsync();
 
-        foreach (var file in template.Files)
+        if(template.Files != null)
         {
-          await _fileService.UploadFiles(file, mail.MailMessageTemplateId);
+          foreach (var file in template.Files)
+          {
+            await UploadFilesToTemplate((FileRequest)file, mail.MailMessageTemplateId);
+          }
         }
 
         await transaction.CommitAsync();
@@ -55,7 +58,31 @@ namespace Application.Services
         await transaction.RollbackAsync();
         throw;
       }
+    }
 
+    public async Task<Domain.Entities.File> UploadFilesToTemplate(FileRequest request, Guid templateId)
+    {
+      await _context.MailMessageTemplates.AsNoTracking()
+        .IsAnyRuleAsync(x => x.MailMessageTemplateId == templateId);
+      int index = request.File.FileName.LastIndexOf("\\");
+      var shortName = request.File.FileName.Substring(index + 1);
+
+      var newFile = new Domain.Entities.File
+      {
+        ContentType = request.File.ContentType,
+        FileName = shortName,
+        MailMessageTemplateId = templateId
+      };
+
+      using (var target = new MemoryStream())
+      {
+        request.File.CopyTo(target);
+        newFile.DataFiles = target.ToArray();
+      }
+      _context.Files.Add(newFile);
+
+      await _context.SaveChangesAsync();
+      return newFile;
     }
 
     public async Task DeleteMailMessageTemplate(Guid templateId)

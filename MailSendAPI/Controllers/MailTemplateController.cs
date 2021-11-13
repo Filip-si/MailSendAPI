@@ -35,6 +35,15 @@ namespace MailSendAPI.Controllers
     public async Task<IActionResult> AddMailMessageTemplate([FromForm] MailMessageTemplateRequest template)
     {
       var mailMessageTemplateId = await _mailTemplateService.AddMailMessageTemplate(template);
+      return StatusCode(StatusCodes.Status201Created, mailMessageTemplateId);
+    }
+
+    [HttpPost("{templateId}/files")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    public async Task<IActionResult> UploadFiles(FileRequest request, Guid templateId)
+    {
+      await _mailTemplateService.UploadFilesToTemplate(request, templateId);
       return StatusCode(StatusCodes.Status201Created);
     }
 
