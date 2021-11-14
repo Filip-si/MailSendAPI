@@ -12,5 +12,7 @@ namespace Infrastructure
     public DbSet<MailMessageTemplate> MailMessageTemplates { get; set; }
 
     public DbSet<File> Files { get; set; }
+
+    public DbSet<Message> Messages { get; set; }
   }
 }

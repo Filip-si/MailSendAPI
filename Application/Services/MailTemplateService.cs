@@ -33,25 +33,21 @@ namespace Application.Services
       await using var transaction = await _context.Database.BeginTransactionAsync();
       try
       {
-        MailMessageTemplate mail = new()
-        {
-          Subject = template.Subject,
-          Body = template.Body
-        };
+        MailMessageTemplate temp = new(template.Subject, template.Body);
 
-        await _context.AddAsync(mail);
+        await _context.AddAsync(temp);
         await _context.SaveChangesAsync();
 
         if(template.Files != null)
         {
           foreach (var file in template.Files)
           {
-            await UploadFilesToTemplate((FileRequest)file, mail.MailMessageTemplateId);
+            await UploadFilesToTemplate(file, temp.MailMessageTemplateId);
           }
         }
-
+        
         await transaction.CommitAsync();
-        return mail.MailMessageTemplateId;
+        return temp.MailMessageTemplateId;
       }
       catch (Exception)
       {
@@ -60,23 +56,23 @@ namespace Application.Services
       }
     }
 
-    public async Task<Domain.Entities.File> UploadFilesToTemplate(FileRequest request, Guid templateId)
+    public async Task<Domain.Entities.File> UploadFilesToTemplate(IFormFile request, Guid templateId)
     {
       await _context.MailMessageTemplates.AsNoTracking()
         .IsAnyRuleAsync(x => x.MailMessageTemplateId == templateId);
-      int index = request.File.FileName.LastIndexOf("\\");
-      var shortName = request.File.FileName.Substring(index + 1);
+      int index = request.FileName.LastIndexOf("\\");
+      var shortName = request.FileName.Substring(index + 1);
 
       var newFile = new Domain.Entities.File
       {
-        ContentType = request.File.ContentType,
+        ContentType = request.ContentType,
         FileName = shortName,
         MailMessageTemplateId = templateId
       };
 
       using (var target = new MemoryStream())
       {
-        request.File.CopyTo(target);
+        request.CopyTo(target);
         newFile.DataFiles = target.ToArray();
       }
       _context.Files.Add(newFile);

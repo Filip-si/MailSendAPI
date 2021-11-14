@@ -12,5 +12,12 @@ namespace Domain.Entities
     public string Body { get; set; }
 
     public virtual ICollection<File> Files { get; set; }
+    public virtual ICollection<Message> Messages { get; set; }
+
+    public MailMessageTemplate(string Subject, string Body)
+    {
+      this.Subject = Subject;
+      this.Body = Body;
+    }
   }
 }

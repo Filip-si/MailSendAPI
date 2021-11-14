@@ -41,7 +41,7 @@ namespace MailSendAPI.Controllers
     [HttpPost("{templateId}/files")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> UploadFiles(FileRequest request, Guid templateId)
+    public async Task<IActionResult> UploadFiles([FromForm] IFormFile request, Guid templateId)
     {
       await _mailTemplateService.UploadFilesToTemplate(request, templateId);
       return StatusCode(StatusCodes.Status201Created);

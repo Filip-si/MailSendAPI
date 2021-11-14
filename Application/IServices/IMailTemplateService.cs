@@ -13,7 +13,7 @@ namespace Application.IServices
 
     Task<Guid> AddMailMessageTemplate(MailMessageTemplateRequest template);
 
-    Task<File> UploadFilesToTemplate(FileRequest request, Guid templateId);
+    Task<File> UploadFilesToTemplate(IFormFile request, Guid templateId);
 
     Task DeleteMailMessageTemplate(Guid templateId);
   }

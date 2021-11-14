@@ -1,5 +1,6 @@
 ﻿using Application.IServices;
 using Application.Models;
+using Domain.Entities;
 using Infrastructure;
 using Infrastructure.Exceptions;
 using Infrastructure.Extensions;
@@ -46,35 +47,61 @@ namespace Application.Services
 
     public async Task SendMailMessageByTemplate(Guid templateId, string recepients)
     {
-      await _context.MailMessageTemplates.AsNoTracking()
+      await using var transaction = await _context.Database.BeginTransactionAsync();
+      try
+      {
+        await _context.MailMessageTemplates.AsNoTracking()
         .IsAnyRuleAsync(x => x.MailMessageTemplateId == templateId);
 
-      if(recepients == null)
-      {
-        throw new BusinessException("Recepients not found");
+        var mailMessageTemplate = await _context.MailMessageTemplates
+          .Include(x => x.Files)
+          .SingleAsync(x => x.MailMessageTemplateId == templateId);
+
+        var mailMessage = CreateMailMessage(mailMessageTemplate, recepients);
+        
+        
+        //await _context.AddAsync(mailMessage); 
+        //var outbox = new OutboxMessageRequest
+        //{
+        //  Count = 0
+        //};
+        //await _context.AddAsync(outbox);
+        //await _context.SaveChangesAsync();
+        //await transaction.CommitAsync();
+
+        // var outboxList = await _context.Outboxs.Where(x => x.Count == 0).ToListAsync();
+        await SmtpClientConfig().SendMailAsync(mailMessage.Result);
+        await transaction.CommitAsync();
+
       }
+      catch (Exception)
+      {
+        await transaction.RollbackAsync();
+        throw;
+      }
+    }
 
-      var mailMessageTemplate = await _context.MailMessageTemplates.SingleAsync(x => x.MailMessageTemplateId == templateId);
-
+    private async Task<MailMessage> CreateMailMessage(MailMessageTemplate mailMessageTemplate, string recepients)
+    {
       MailMessage mailMessage = new();
       mailMessage.From = new MailAddress(_configuration["EmailConfigurations:From"]);
       mailMessage.CC.Add(recepients);
       mailMessage.Subject = mailMessageTemplate.Subject;
       mailMessage.Body = mailMessageTemplate.Body;
+      await AddAttachmentsAsync(mailMessageTemplate.MailMessageTemplateId, mailMessage);
+      return mailMessage;
+    }
 
-      if (mailMessageTemplate.Files != null)
-      {
-        var attachments = await _context.Files
+    private async Task AddAttachmentsAsync(Guid templateId, MailMessage mailMessage)
+    {
+      var attachments = await _context.Files
           .Where(x => x.MailMessageTemplateId == templateId)
           .ToListAsync();
-        foreach (var file in attachments)
-        {
-          Stream stream = new MemoryStream(file.DataFiles);
-          mailMessage.Attachments.Add(new Attachment(stream, file.FileName));
-        }
+      foreach (var file in attachments)
+      {
+        Stream stream = new MemoryStream(file.DataFiles);
+        mailMessage.Attachments.Add(new Attachment(stream, file.FileName));
       }
-
-      await SmtpClientConfig().SendMailAsync(mailMessage);
     }
 
     private SmtpClient SmtpClientConfig()
