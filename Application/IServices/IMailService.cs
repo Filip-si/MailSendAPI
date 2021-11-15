@@ -1,5 +1,6 @@
 ﻿using Application.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Application.IServices
@@ -8,6 +9,6 @@ namespace Application.IServices
   {
     Task SendMailMessage(MailRequest request);
 
-    Task SendMailMessageByTemplate(Guid templateId, string recepients);
+    Task SendMailMessageByTemplate(Guid templateId, IEnumerable<string> recepients);
   }
 }

@@ -61,7 +61,7 @@ namespace Application.Services
       await _context.MailMessageTemplates.AsNoTracking()
         .IsAnyRuleAsync(x => x.MailMessageTemplateId == templateId);
       int index = request.FileName.LastIndexOf("\\");
-      var shortName = request.FileName.Substring(index + 1);
+      var shortName = request.FileName[(index + 1)..];
 
       var newFile = new Domain.Entities.File
       {

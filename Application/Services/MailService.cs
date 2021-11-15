@@ -2,11 +2,11 @@
 using Application.Models;
 using Domain.Entities;
 using Infrastructure;
-using Infrastructure.Exceptions;
 using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -20,12 +20,15 @@ namespace Application.Services
   {
     private readonly IConfiguration _configuration;
     private readonly DatabaseContext _context;
+    private readonly IMessageService _messageService;
 
-    public MailService(IConfiguration configuration, DatabaseContext context)
+    public MailService(IConfiguration configuration, DatabaseContext context, IMessageService messageService)
     {
       _configuration = configuration;
       _context = context;
+      _messageService = messageService;
     }
+
     public async Task SendMailMessage(MailRequest request)
     {
       try
@@ -45,7 +48,7 @@ namespace Application.Services
       }
     }
 
-    public async Task SendMailMessageByTemplate(Guid templateId, string recepients)
+    public async Task SendMailMessageByTemplate(Guid templateId, IEnumerable<string> recepients)
     {
       await using var transaction = await _context.Database.BeginTransactionAsync();
       try
@@ -57,22 +60,17 @@ namespace Application.Services
           .Include(x => x.Files)
           .SingleAsync(x => x.MailMessageTemplateId == templateId);
 
-        var mailMessage = CreateMailMessage(mailMessageTemplate, recepients);
-        
-        
-        //await _context.AddAsync(mailMessage); 
-        //var outbox = new OutboxMessageRequest
-        //{
-        //  Count = 0
-        //};
-        //await _context.AddAsync(outbox);
-        //await _context.SaveChangesAsync();
-        //await transaction.CommitAsync();
+        await _messageService.AddMessages(recepients, templateId); 
 
-        // var outboxList = await _context.Outboxs.Where(x => x.Count == 0).ToListAsync();
-        await SmtpClientConfig().SendMailAsync(mailMessage.Result);
+
+        var mailMessages = await CreateMailMessageAsync(mailMessageTemplate, recepients); 
+
+        foreach (var mail in mailMessages)
+        {
+          await SmtpClientConfig().SendMailAsync(mail);
+        }
+
         await transaction.CommitAsync();
-
       }
       catch (Exception)
       {
@@ -81,15 +79,17 @@ namespace Application.Services
       }
     }
 
-    private async Task<MailMessage> CreateMailMessage(MailMessageTemplate mailMessageTemplate, string recepients)
+    private async Task<List<MailMessage>> CreateMailMessageAsync(MailMessageTemplate mailMessageTemplate, IEnumerable<string> recepients)
     {
-      MailMessage mailMessage = new();
-      mailMessage.From = new MailAddress(_configuration["EmailConfigurations:From"]);
-      mailMessage.CC.Add(recepients);
-      mailMessage.Subject = mailMessageTemplate.Subject;
-      mailMessage.Body = mailMessageTemplate.Body;
-      await AddAttachmentsAsync(mailMessageTemplate.MailMessageTemplateId, mailMessage);
-      return mailMessage;
+      List<MailMessage> mails = new();
+      foreach (var recepientAddress in recepients)
+      {
+        MailMessage mailMessage = new MailMessage(_configuration["EmailConfigurations:From"], recepientAddress, mailMessageTemplate.Subject, mailMessageTemplate.Body);
+        await AddAttachmentsAsync(mailMessageTemplate.MailMessageTemplateId, mailMessage);
+
+        mails.Add(mailMessage);
+      }
+      return mails;
     }
 
     private async Task AddAttachmentsAsync(Guid templateId, MailMessage mailMessage)

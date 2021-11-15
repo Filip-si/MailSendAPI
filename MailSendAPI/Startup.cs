@@ -32,6 +32,7 @@ namespace MailSendAPI
     public void ConfigureServices(IServiceCollection services)
     {
       services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+      services.AddScoped<IMessageService, MessageService>();
       services.AddScoped<IMailService, MailService>();
       services.AddScoped<IMailTemplateService, MailTemplateService>();
       services.AddControllers(opt =>
