@@ -27,5 +27,6 @@ namespace Domain.Entities
 
     public virtual MailMessageTemplate MailMessageTemplate { get; set; }
 
+    public virtual OutboxMessage OutboxMessage { get; set; }
   }
 }

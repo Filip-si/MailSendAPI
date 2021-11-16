@@ -38,14 +38,14 @@ namespace MailSendAPI.Controllers
       return StatusCode(StatusCodes.Status201Created, mailMessageTemplateId);
     }
 
-    [HttpPost("{templateId}/files")]
-    [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> UploadFiles([FromForm] IFormFile request, Guid templateId)
-    {
-      await _mailTemplateService.UploadFilesToTemplate(request, templateId);
-      return StatusCode(StatusCodes.Status201Created);
-    }
+    //[HttpPost("{templateId}/files")]
+    //[Produces("application/json")]
+    //[ProducesResponseType(StatusCodes.Status201Created)]
+    //public async Task<IActionResult> UploadFiles([FromForm] IFormFile request, Guid templateId)
+    //{
+    //  await _mailTemplateService.UploadFilesToTemplate(request, templateId);
+    //  return StatusCode(StatusCodes.Status201Created);
+    //}
 
     [HttpDelete("{templateId}")]
     [Produces("application/json")]

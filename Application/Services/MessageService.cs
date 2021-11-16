@@ -28,17 +28,38 @@ namespace Application.Services
         .ToListAsync();
     }
 
-    public async Task AddMessages(IEnumerable<string> recepients, Guid templateId)
+    public async Task<List<OutboxMessage>> SaveMessagesAsync(IEnumerable<string> recepients, Guid templateId)
     {
-      List<Message> messages = new();
-      foreach (var recepient in recepients)
+      await using var transaction = await _context.Database.BeginTransactionAsync();
+      try
       {
-        Message message = new(_configuration["EmailConfigurations:From"], recepient, templateId, DateTime.Now, false);
-        messages.Add(message);
-      }
+        List<Message> messages = new();
+        foreach (var recepient in recepients)
+        {
+          Message message = new(_configuration["EmailConfigurations:From"], recepient, templateId, DateTime.Now, false);
+          messages.Add(message);
+        }
 
-      await _context.AddRangeAsync(messages);
-      await _context.SaveChangesAsync();
+        await _context.AddRangeAsync(messages);
+        await _context.SaveChangesAsync();
+
+        List<OutboxMessage> outboxMessages = new();
+        foreach (var message in messages)
+        {
+          OutboxMessage outboxMessage = new(Guid.NewGuid(), 0);
+          outboxMessage.MessageId = message.MessageId;
+          outboxMessages.Add(outboxMessage);
+        }
+        
+        await transaction.CommitAsync();
+        return outboxMessages;
+      }
+      catch (Exception)
+      {
+        await transaction.RollbackAsync();
+        throw;
+      }
+      
     }
 
     public async Task AddMessage(string recepients, Guid templateId)

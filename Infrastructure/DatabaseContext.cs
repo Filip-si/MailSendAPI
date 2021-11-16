@@ -14,5 +14,7 @@ namespace Infrastructure
     public DbSet<File> Files { get; set; }
 
     public DbSet<Message> Messages { get; set; }
+
+    public DbSet<OutboxMessage> OutboxMessages { get; set; }
   }
 }

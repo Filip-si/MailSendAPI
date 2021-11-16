@@ -12,10 +12,6 @@ namespace Infrastructure.EntityTypeConfiguration
       builder.Property(x => x.MessageId)
         .IsRequired();
 
-      builder.HasOne(x => x.MailMessageTemplate)
-        .WithMany(x => x.Messages)
-        .HasForeignKey(x => x.MessageId);
-
       builder.Property(x => x.From)
         .HasMaxLength(100);
 

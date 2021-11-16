@@ -50,7 +50,6 @@ namespace Application.Services
 
     public async Task SendMailMessageByTemplate(Guid templateId, IEnumerable<string> recepients)
     {
-      await using var transaction = await _context.Database.BeginTransactionAsync();
       try
       {
         await _context.MailMessageTemplates.AsNoTracking()
@@ -60,36 +59,34 @@ namespace Application.Services
           .Include(x => x.Files)
           .SingleAsync(x => x.MailMessageTemplateId == templateId);
 
-        await _messageService.AddMessages(recepients, templateId); 
+        var messages = await _messageService.SaveMessagesAsync(recepients, templateId);
 
-
-        var mailMessages = await CreateMailMessageAsync(mailMessageTemplate, recepients); 
+        var mailMessages = await CreateMailMessagesAsync(messages);
 
         foreach (var mail in mailMessages)
         {
           await SmtpClientConfig().SendMailAsync(mail);
         }
-
-        await transaction.CommitAsync();
       }
       catch (Exception)
       {
-        await transaction.RollbackAsync();
         throw;
       }
     }
 
-    private async Task<List<MailMessage>> CreateMailMessageAsync(MailMessageTemplate mailMessageTemplate, IEnumerable<string> recepients)
+    private async Task<List<MailMessage>> CreateMailMessagesAsync(List<OutboxMessage> outboxMessages)
     {
-      List<MailMessage> mails = new();
-      foreach (var recepientAddress in recepients)
+      List<MailMessage> mailMessages = new();
+      foreach (var outbox in outboxMessages)
       {
-        MailMessage mailMessage = new MailMessage(_configuration["EmailConfigurations:From"], recepientAddress, mailMessageTemplate.Subject, mailMessageTemplate.Body);
-        await AddAttachmentsAsync(mailMessageTemplate.MailMessageTemplateId, mailMessage);
+        var message = _context.Messages.Where(x => x.MessageId == outbox.MessageId).Single();
+        MailMessage mail = new(_configuration["EmailConfigurations:From"], message.To, message.MailMessageTemplate.Subject, message.MailMessageTemplate.Body);
+        await AddAttachmentsAsync(message.MailMessageTemplateId, mail);
 
-        mails.Add(mailMessage);
+        mailMessages.Add(mail);
       }
-      return mails;
+
+      return mailMessages;
     }
 
     private async Task AddAttachmentsAsync(Guid templateId, MailMessage mailMessage)
