@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20211116145555_Initial")]
+    [Migration("20211117073538_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -74,9 +74,6 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("From")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsSent")
-                        .HasColumnType("bit");
 
                     b.Property<Guid>("MailMessageTemplateId")
                         .HasColumnType("uniqueidentifier");

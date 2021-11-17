@@ -4,13 +4,12 @@ namespace Domain.Entities
 {
   public class Message
   {
-    public Message(string From, string To, Guid MailMessageTemplateId, DateTime CreatedOn, bool IsSent)
+    public Message(string From, string To, Guid MailMessageTemplateId, DateTime CreatedOn)
     {
       this.From = From;
       this.To = To;
       this.MailMessageTemplateId = MailMessageTemplateId;
       this.CreatedOn = CreatedOn;
-      this.IsSent = IsSent;
     }
 
     public Guid MessageId { get; set; }
@@ -18,8 +17,6 @@ namespace Domain.Entities
     public string From { get; set; }
 
     public string To { get; set; }
-
-    public bool IsSent { get; set; }
 
     public DateTime CreatedOn { get; set; }
 

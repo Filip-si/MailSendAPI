@@ -22,9 +22,17 @@ namespace Application.Services
       _context = context;
     }
 
-    public async Task<IEnumerable<MailMessageTemplate>> GetMailMessageTemplates()
+    public async Task<IEnumerable<MailMessageTemplateResponse>> GetMailMessageTemplates()
     {
-      return await _context.MailMessageTemplates.AsNoTracking()
+      return await _context.MailMessageTemplates
+        .Select(response => new MailMessageTemplateResponse
+        {
+          MailTemplateId = response.MailMessageTemplateId,
+          Subject = response.Subject,
+          Body = response.Body,
+          Files = response.Files.Select(x => x.FileId).ToList(),
+          Messages = response.Messages.Select(x => x.MessageId).ToList()
+        })
         .ToListAsync();
     }
 

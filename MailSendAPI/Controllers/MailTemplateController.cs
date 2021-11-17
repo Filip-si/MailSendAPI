@@ -1,6 +1,5 @@
 ﻿using Application.IServices;
 using Application.Models;
-using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -23,7 +22,7 @@ namespace MailSendAPI.Controllers
     [HttpGet]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesDefaultResponseType(typeof(IEnumerable<MailMessageTemplate>))]
+    [ProducesDefaultResponseType(typeof(IEnumerable<MailMessageTemplateResponse>))]
     public async Task<IActionResult> GetMailMessageTemplates()
     {      
       return Ok(await _mailTemplateService.GetMailMessageTemplates());
@@ -38,15 +37,6 @@ namespace MailSendAPI.Controllers
       return StatusCode(StatusCodes.Status201Created, mailMessageTemplateId);
     }
 
-    //[HttpPost("{templateId}/files")]
-    //[Produces("application/json")]
-    //[ProducesResponseType(StatusCodes.Status201Created)]
-    //public async Task<IActionResult> UploadFiles([FromForm] IFormFile request, Guid templateId)
-    //{
-    //  await _mailTemplateService.UploadFilesToTemplate(request, templateId);
-    //  return StatusCode(StatusCodes.Status201Created);
-    //}
-
     [HttpDelete("{templateId}")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -55,6 +45,5 @@ namespace MailSendAPI.Controllers
       await _mailTemplateService.DeleteMailMessageTemplate(templateId);
       return StatusCode(StatusCodes.Status204NoContent);
     }
-
   }
 }

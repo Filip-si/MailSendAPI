@@ -2,6 +2,7 @@
 using Application.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ namespace MailSendAPI.Controllers
     [HttpPost("{templateId}")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
-    public async Task<IActionResult> SendMailMessageByTemplate(Guid templateId, IEnumerable<string> recepients)
+    public async Task<IActionResult> SendMailMessageByTemplate(Guid templateId,[FromForm] [BindRequired] IEnumerable<string> recepients)
     {
       await _mailService.SendMailMessageByTemplate(templateId, recepients);
       return StatusCode(StatusCodes.Status202Accepted);

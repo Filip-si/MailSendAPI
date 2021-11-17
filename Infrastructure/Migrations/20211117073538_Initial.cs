@@ -48,7 +48,6 @@ namespace Infrastructure.Migrations
                     MessageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     From = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     To = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsSent = table.Column<bool>(type: "bit", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
                     MailMessageTemplateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },

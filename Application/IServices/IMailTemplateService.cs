@@ -9,7 +9,7 @@ namespace Application.IServices
 {
   public interface IMailTemplateService
   {
-    Task<IEnumerable<MailMessageTemplate>> GetMailMessageTemplates();
+    Task<IEnumerable<MailMessageTemplateResponse>> GetMailMessageTemplates();
 
     Task<Guid> AddMailMessageTemplate(MailMessageTemplateRequest template);
 

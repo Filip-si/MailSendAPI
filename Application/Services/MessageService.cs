@@ -36,7 +36,7 @@ namespace Application.Services
         List<Message> messages = new();
         foreach (var recepient in recepients)
         {
-          Message message = new(_configuration["EmailConfigurations:From"], recepient, templateId, DateTime.Now, false);
+          Message message = new(_configuration["EmailConfigurations:From"], recepient, templateId, DateTime.Now);
           messages.Add(message);
         }
 
@@ -46,11 +46,13 @@ namespace Application.Services
         List<OutboxMessage> outboxMessages = new();
         foreach (var message in messages)
         {
-          OutboxMessage outboxMessage = new(Guid.NewGuid(), 0);
+          OutboxMessage outboxMessage = new(0);
           outboxMessage.MessageId = message.MessageId;
           outboxMessages.Add(outboxMessage);
         }
-        
+
+        await _context.AddRangeAsync(outboxMessages);
+        await _context.SaveChangesAsync();
         await transaction.CommitAsync();
         return outboxMessages;
       }
@@ -64,7 +66,7 @@ namespace Application.Services
 
     public async Task AddMessage(string recepients, Guid templateId)
     {
-      Message message = new(_configuration["EmailConfigurations:From"], recepients, templateId, DateTime.Now, false);
+      Message message = new(_configuration["EmailConfigurations:From"], recepients, templateId, DateTime.Now);
 
       await _context.AddRangeAsync(message);
       await _context.SaveChangesAsync();

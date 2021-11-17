@@ -73,9 +73,6 @@ namespace Infrastructure.Migrations
                     b.Property<string>("From")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsSent")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("MailMessageTemplateId")
                         .HasColumnType("uniqueidentifier");
 

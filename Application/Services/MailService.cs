@@ -61,11 +61,22 @@ namespace Application.Services
 
         var messages = await _messageService.SaveMessagesAsync(recepients, templateId);
 
-        var mailMessages = await CreateMailMessagesAsync(messages);
+        var unsendMessages = messages.Where(x => x.Count == 0).ToList();
 
-        foreach (var mail in mailMessages)
+        if(unsendMessages.Count == 0)
         {
-          await SmtpClientConfig().SendMailAsync(mail);
+        }
+        else
+        {
+          foreach (var outboxMessage in unsendMessages)
+          {
+
+            var mailMessage = await CreateMailMessageAsync(outboxMessage);
+            await SmtpClientConfig().SendMailAsync(mailMessage);
+            outboxMessage.Count++;
+            _context.Update(outboxMessage);
+            _context.SaveChanges();
+          }
         }
       }
       catch (Exception)
@@ -74,19 +85,12 @@ namespace Application.Services
       }
     }
 
-    private async Task<List<MailMessage>> CreateMailMessagesAsync(List<OutboxMessage> outboxMessages)
+    private async Task<MailMessage> CreateMailMessageAsync(OutboxMessage outboxMessage)
     {
-      List<MailMessage> mailMessages = new();
-      foreach (var outbox in outboxMessages)
-      {
-        var message = _context.Messages.Where(x => x.MessageId == outbox.MessageId).Single();
-        MailMessage mail = new(_configuration["EmailConfigurations:From"], message.To, message.MailMessageTemplate.Subject, message.MailMessageTemplate.Body);
-        await AddAttachmentsAsync(message.MailMessageTemplateId, mail);
-
-        mailMessages.Add(mail);
-      }
-
-      return mailMessages;
+      var message = _context.Messages.Where(x => x.MessageId == outboxMessage.MessageId).Single();
+      MailMessage mail = new(_configuration["EmailConfigurations:From"], message.To, message.MailMessageTemplate.Subject, message.MailMessageTemplate.Body);
+      await AddAttachmentsAsync(message.MailMessageTemplateId, mail);
+      return mail;
     }
 
     private async Task AddAttachmentsAsync(Guid templateId, MailMessage mailMessage)
