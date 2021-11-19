@@ -1,4 +1,4 @@
-using Application.IServices;
+﻿using Application.IServices;
 using Application.Services;
 using Infrastructure.Exceptions;
 using Microsoft.AspNetCore.Builder;
@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using Infrastructure;
 using Infrastructure.Logger;
+using MailSendAPI.Configurations;
 
 namespace MailSendAPI
 {
@@ -32,13 +33,18 @@ namespace MailSendAPI
     public void ConfigureServices(IServiceCollection services)
     {
       services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-      services.AddScoped<IMessageService, MessageService>();
-      services.AddScoped<IMailService, MailService>();
-      services.AddScoped<IMailTemplateService, MailTemplateService>();
+      services.AddScoped<IFileHeaderService, FileHeaderService>();
+      services.AddScoped<IFileAttachmentService, FileAttachmentService>();
+      services.AddScoped<IFileService, FileService>();
+      services.AddScoped<ITemplateService, TemplateService>();
+      //services.AddScoped<IMessageService, MessageService>();
+      //services.AddScoped<IMailService, MailService>();
       services.AddControllers(opt =>
       {
         opt.Filters.Add(new BusinessExceptionFilter(Logger));
       });
+
+      services.AddEmail(Configuration);
       services.AddSwaggerGen(c =>
       {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "MailSendAPI", Version = "v1" });
