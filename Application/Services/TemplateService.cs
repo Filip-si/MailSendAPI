@@ -84,8 +84,6 @@ namespace Application.Services
 
     private async Task<FileHeader> UploadFileHeaderToTemplateAsync(IFormFile request, Guid templateId)
     {
-      await _context.Templates.AsNoTracking()
-        .IsAnyRuleAsync(x => x.TemplateId == templateId);
       var index = request.FileName.LastIndexOf("\\");
       var shortName = request.FileName[(index + 1)..];
 
@@ -107,8 +105,6 @@ namespace Application.Services
 
     private async Task<FileAttachment> UploadFileAttachmentToTemplateAsync(IFormFile request, Guid? filesId, Guid templateId)
     {
-      await _context.Templates.AsNoTracking()
-        .IsAnyRuleAsync(x => x.TemplateId == templateId);
       var index = request.FileName.LastIndexOf("\\");
       var shortName = request.FileName[(index + 1)..];
 
@@ -163,7 +159,13 @@ namespace Application.Services
         .IsAnyRuleAsync(x => x.TemplateId == templateId);
 
         var template = await _context.Templates.SingleAsync(x => x.TemplateId == templateId);
+        var filesId = await _context.Files
+          .Where(x => x.FilesId == template.FilesId)
+          .Select(x => x.FilesId)
+          .SingleAsync();
 
+        await _fileService.DeleteFiles(filesId);
+        
         _context.Remove(template);
         await _context.SaveChangesAsync();
         await transaction.CommitAsync();

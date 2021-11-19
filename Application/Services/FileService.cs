@@ -5,6 +5,7 @@ using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -49,7 +50,6 @@ namespace Application.Services
 
     public async Task DeleteFiles(Guid? filesId)
     {
-      await using var transaction = await _context.Database.BeginTransactionAsync();
       try
       {
         await _context.Files.AsNoTracking()
@@ -57,21 +57,20 @@ namespace Application.Services
 
         var files = await _context.Files.AsNoTracking().SingleAsync(x => x.FilesId == filesId);
 
-        await _fileHeaderService.DeleteFileHeader(files.FileHeaderId);
+        var filesAttachments = await _context.FileAttachments.Where(x => x.FilesId == files.FilesId).ToListAsync();
 
-        foreach (var attachment in files.FilesAttachments)
+        foreach (var attachment in filesAttachments)
         {
           await _fileAttachmentService.DeleteFileAttachment(attachment.FileAttachmentId);
         }
 
         _context.Remove(files);
-        await _context.SaveChangesAsync();
 
-        await transaction.CommitAsync();
+        await _fileHeaderService.DeleteFileHeader(files.FileHeaderId);
+        await _context.SaveChangesAsync();
       }
       catch (Exception)
       {
-        await transaction.RollbackAsync();
         throw;
       }
     }

@@ -22,7 +22,7 @@ namespace MailSendAPI.Controllers
     [HttpGet]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesDefaultResponseType(typeof(IEnumerable<MailMessageTemplateResponse>))]
+    [ProducesDefaultResponseType(typeof(IEnumerable<TemplateResponse>))]
     public async Task<IActionResult> GetTemplates()
     {
       return Ok(await _templateService.GetTemplates());
