@@ -9,12 +9,11 @@ namespace Application.Validators
     {
       RuleFor(x => x.Subject)
         .MaximumLength(998)
-        .NotEmpty()
+        .NotEmpty()//sprawdzic
         .NotNull();
 
       RuleFor(x => x.Body)
         .MaximumLength(384000)
-        .NotEmpty()
         .NotNull();
     }
   }
