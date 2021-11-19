@@ -1,10 +1,9 @@
 ﻿using Application.IServices;
 using Application.Models;
+using Application.Models.Templates;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MailSendAPI.Controllers
@@ -22,20 +21,20 @@ namespace MailSendAPI.Controllers
 
     [HttpPost]
     [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status202Accepted)]
+    [ProducesResponseType(StatusCodes.Status201Created)]
     public async Task<IActionResult> SendMailMessage(MailRequest request)
     {
       await _mailService.SendMailMessage(request);
-      return StatusCode(StatusCodes.Status202Accepted);
+      return StatusCode(StatusCodes.Status201Created);
     }
 
-    [HttpPost("{templateId}")]
+    [HttpPost("template")]
     [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status202Accepted)]
-    public async Task<IActionResult> SendMailMessageByTemplate(Guid templateId,[FromForm] [BindRequired] IEnumerable<string> recepients)
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    public async Task<IActionResult> SendEmailFromTemplate([FromForm] BasicModel basicModel, [BindRequired] string recepient)
     {
-      await _mailService.SendMailMessageByTemplate(templateId, recepients);
-      return StatusCode(StatusCodes.Status202Accepted);
+      await _mailService.SendEmailFromTemplate(basicModel, recepient);
+      return StatusCode(StatusCodes.Status201Created);
     }
   }
 }

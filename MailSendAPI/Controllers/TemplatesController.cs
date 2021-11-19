@@ -10,40 +10,41 @@ namespace MailSendAPI.Controllers
 {
   [ApiController]
   [Route("api/templates")]
-  public class MailTemplateController : ControllerBase
+  public class TemplateController : ControllerBase
   {
-    private readonly IMailTemplateService _mailTemplateService;
+    private readonly ITemplateService _templateService;
 
-    public MailTemplateController(IMailTemplateService mailTemplateService)
+    public TemplateController(ITemplateService templateService)
     {
-      _mailTemplateService = mailTemplateService;
+      _templateService = templateService;
     }
 
     [HttpGet]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesDefaultResponseType(typeof(IEnumerable<MailMessageTemplateResponse>))]
-    public async Task<IActionResult> GetMailMessageTemplates()
-    {      
-      return Ok(await _mailTemplateService.GetMailMessageTemplates());
+    public async Task<IActionResult> GetTemplates()
+    {
+      return Ok(await _templateService.GetTemplates());
     }
 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesDefaultResponseType(typeof(Guid))]
-    public async Task<IActionResult> AddMailMessageTemplate([FromForm] MailMessageTemplateRequest template)
+    public async Task<IActionResult> AddTemplate([FromForm] FileRequest fileRequest, string from, string to)
     {
-      var mailMessageTemplateId = await _mailTemplateService.AddMailMessageTemplate(template);
-      return StatusCode(StatusCodes.Status201Created, mailMessageTemplateId);
+      var templateId = await _templateService.AddTemplate(fileRequest, from, to);
+      return StatusCode(StatusCodes.Status201Created, templateId);
     }
 
     [HttpDelete("{templateId}")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> DeleteMailMessageTemplate(Guid templateId)
+    public async Task<IActionResult> DeleteTemplate(Guid templateId)
     {
-      await _mailTemplateService.DeleteMailMessageTemplate(templateId);
+      await _templateService.DeleteTemplate(templateId);
       return StatusCode(StatusCodes.Status204NoContent);
     }
+
   }
 }
