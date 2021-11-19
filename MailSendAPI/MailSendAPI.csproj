@@ -6,6 +6,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Templates\BasicTemplate.cshtml" />
+    <Content Remove="Templates\ExampleTemplate.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Templates\BasicTemplate.cshtml" />
+    <None Include="Templates\ExampleTemplate.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentEmail.Razor" Version="3.0.0" />
+    <PackageReference Include="FluentEmail.Smtp" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="5.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.11">
       <PrivateAssets>all</PrivateAssets>
