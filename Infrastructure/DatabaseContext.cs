@@ -9,12 +9,14 @@ namespace Infrastructure
     {
     }
 
-    public DbSet<MailMessageTemplate> MailMessageTemplates { get; set; }
+    //public DbSet<Template> Templates { get; set; }
 
-    public DbSet<File> Files { get; set; }
+    public DbSet<FileAttachment> FileAttachments { get; set; }
+    public DbSet<FileHeader> FileHeaders { get; set; }
+    public DbSet<Files> Files { get; set; }
 
-    public DbSet<Message> Messages { get; set; }
+    public DbSet<Template> Templates { get; set; }
 
-    public DbSet<OutboxMessage> OutboxMessages { get; set; }
+    //public DbSet<OutboxMessage> OutboxMessages { get; set; }
   }
 }

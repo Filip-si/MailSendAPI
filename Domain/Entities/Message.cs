@@ -1,29 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
   public class Message
   {
-    public Message(string From, string To, Guid MailMessageTemplateId, DateTime CreatedOn)
-    {
-      this.From = From;
-      this.To = To;
-      this.MailMessageTemplateId = MailMessageTemplateId;
-      this.CreatedOn = CreatedOn;
-    }
-
     public Guid MessageId { get; set; }
 
-    public string From { get; set; }
+    public string Subject { get; set; }
 
-    public string To { get; set; }
+    public string Body { get; set; }
 
-    public DateTime CreatedOn { get; set; }
+    public virtual Template Template { get; set; }
 
-    public Guid MailMessageTemplateId { get; set; }
 
-    public virtual MailMessageTemplate MailMessageTemplate { get; set; }
 
-    public virtual OutboxMessage OutboxMessage { get; set; }
   }
 }
