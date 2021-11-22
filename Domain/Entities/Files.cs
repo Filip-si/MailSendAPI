@@ -12,6 +12,14 @@ namespace Domain.Entities
 
     public virtual FileHeader FileHeader { get; set; }
 
+    public Guid? FileBodyId { get; set; }
+
+    public virtual FileBody FileBody { get; set; }
+
+    public Guid? FileFooterId { get; set; }
+
+    public virtual FileFooter FileFooter { get; set; }
+
     public virtual ICollection<FileAttachment> FilesAttachments { get; set; }
 
     public virtual Template Template { get; set; }

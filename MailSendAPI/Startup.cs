@@ -34,10 +34,11 @@ namespace MailSendAPI
     {
       services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
       services.AddScoped<IFileHeaderService, FileHeaderService>();
+      services.AddScoped<IFileBodyService, FileBodyService>();
+      services.AddScoped<IFileFooterService, FileFooterService>();
       services.AddScoped<IFileAttachmentService, FileAttachmentService>();
       services.AddScoped<IFileService, FileService>();
       services.AddScoped<ITemplateService, TemplateService>();
-      //services.AddScoped<IMessageService, MessageService>();
       services.AddScoped<IMailService, MailService>();
       services.AddControllers(opt =>
       {

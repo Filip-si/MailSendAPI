@@ -38,6 +38,12 @@ namespace Application.Services
       var headerFile = await _context.FileHeaders.AsNoTracking()
         .SingleAsync(x => x.FileHeaderId == files.FileHeaderId);
 
+      var bodyFile = await _context.FileBodies.AsNoTracking()
+        .SingleAsync(x => x.FileBodyId == files.FileBodyId);
+
+      var footerFile = await _context.FileFooters.AsNoTracking()
+        .SingleAsync(x => x.FileFooterId == files.FileFooterId);
+
       var attachmentFiles = await _context.FileAttachments.AsNoTracking()
         .Where(x => x.FilesId == template.FilesId)
         .ToListAsync();
@@ -45,6 +51,8 @@ namespace Application.Services
       foreach (var recepient in recepients)
       {
         var headerAttachment = GetImageInline(new MemoryStream(headerFile.DataFiles), headerFile.ContentType, headerFile.FileName);
+        var bodyAttachment = GetImageInline(new MemoryStream(bodyFile.DataFiles), bodyFile.ContentType, bodyFile.FileName);
+        var footerAttachment = GetImageInline(new MemoryStream(footerFile.DataFiles), footerFile.ContentType, footerFile.FileName);
 
         var attachments = new List<Attachment>();
         foreach (var attachment in attachmentFiles)
@@ -60,10 +68,14 @@ namespace Application.Services
           new BasicModel
           {
             Data = recepient,
-            FileHeaderData = headerAttachment.ContentId
+            FileHeaderData = headerAttachment.ContentId,
+            FileBodyData = bodyAttachment.ContentId,
+            FileFooterData = footerAttachment.ContentId
           })
           .Attach(attachments)
-          .Attach(headerAttachment);
+          .Attach(headerAttachment)
+          .Attach(bodyAttachment)
+          .Attach(footerAttachment);
 
         await email.SendAsync();
       }

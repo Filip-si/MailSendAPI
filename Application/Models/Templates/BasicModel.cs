@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-
-namespace Application.Models.Templates
+﻿namespace Application.Models.Templates
 {
   public class BasicModel
   {

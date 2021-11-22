@@ -44,7 +44,6 @@ namespace Application.Services
         var newTemplate = new Template();
         await _context.AddAsync(newTemplate);
 
-
         var newFiles = new Files();
         await _context.AddAsync(newFiles);
 
@@ -56,7 +55,21 @@ namespace Application.Services
           fileHeader = await UploadFileHeaderToTemplateAsync(fileRequest.FileHeader, newTemplate.TemplateId);
         }
 
+        var fileBody = new FileBody();
+        if (fileRequest.FileBody != null)
+        {
+          fileBody = await UploadFileBodyToTemplateAsync(fileRequest.FileBody, newTemplate.TemplateId);
+        }
+
+        var fileFooter = new FileFooter();
+        if (fileRequest.FileFooter != null)
+        {
+          fileFooter = await UploadFileFooterToTemplateAsync(fileRequest.FileFooter, newTemplate.TemplateId);
+        }
+
         newFiles.FileHeaderId = fileHeader.FileHeaderId;
+        newFiles.FileBodyId = fileBody.FileBodyId;
+        newFiles.FileFooterId = fileFooter.FileFooterId;
 
         var fileAttachments = new List<FileAttachment>();
         if (fileRequest.FileAttachments != null)
@@ -103,6 +116,48 @@ namespace Application.Services
       return fileHeader;
     }
 
+    private async Task<FileBody> UploadFileBodyToTemplateAsync(IFormFile request, Guid templateId)
+    {
+      var index = request.FileName.LastIndexOf("\\");
+      var shortName = request.FileName[(index + 1)..];
+
+      var fileBody = new FileBody
+      {
+        ContentType = request.ContentType,
+        FileName = shortName,
+      };
+
+      using (var target = new MemoryStream())
+      {
+        request.CopyTo(target);
+        fileBody.DataFiles = target.ToArray();
+      }
+      _context.FileBodies.Add(fileBody);
+      await _context.SaveChangesAsync();
+      return fileBody;
+    }
+
+    private async Task<FileFooter> UploadFileFooterToTemplateAsync(IFormFile request, Guid templateId)
+    {
+      var index = request.FileName.LastIndexOf("\\");
+      var shortName = request.FileName[(index + 1)..];
+
+      var fileFooter = new FileFooter
+      {
+        ContentType = request.ContentType,
+        FileName = shortName,
+      };
+
+      using (var target = new MemoryStream())
+      {
+        request.CopyTo(target);
+        fileFooter.DataFiles = target.ToArray();
+      }
+      _context.FileFooters.Add(fileFooter);
+      await _context.SaveChangesAsync();
+      return fileFooter;
+    }
+
     private async Task<FileAttachment> UploadFileAttachmentToTemplateAsync(IFormFile request, Guid? filesId, Guid templateId)
     {
       var index = request.FileName.LastIndexOf("\\");
@@ -124,30 +179,6 @@ namespace Application.Services
       await _context.SaveChangesAsync();
       return fileAttachment;
     }
-
-    //public async Task<FileRequest> UploadFilesToTemplateAsync(IFormFile request, Guid templateId)
-    //{
-    //  await _context.Templates.AsNoTracking()
-    //    .IsAnyRuleAsync(x => x.TemplateId == templateId);
-    //  var index = request.FileName.LastIndexOf("\\");
-    //  var shortName = request.FileName[(index + 1)..];
-
-    //  var newFile = new Domain.Entities.File
-    //  {
-    //    ContentType = request.ContentType,
-    //    FileName = shortName,
-    //    TemplateId = templateId
-    //  };
-
-    //  using (var target = new MemoryStream())
-    //  {
-    //    request.CopyTo(target);
-    //    newFile.DataFiles = target.ToArray();
-    //  }
-    //  _context.Files.Add(newFile);
-
-    //  return newFile;
-    //}
 
     public async Task DeleteTemplate(Guid templateId)
     {

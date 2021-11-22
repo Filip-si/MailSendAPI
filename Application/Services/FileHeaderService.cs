@@ -1,7 +1,6 @@
 ﻿using Application.IServices;
 using Domain.Entities;
 using Infrastructure;
-using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -41,13 +40,13 @@ namespace Application.Services
 
     public async Task DeleteFileHeader(Guid? fileHeaderId)
     {
-      await _context.FileHeaders.AsNoTracking()
-          .IsAnyRuleAsync(x => x.FileHeaderId == fileHeaderId);
+      if(await _context.FileHeaders.AnyAsync(x => x.FileHeaderId == fileHeaderId))
+      {
+        var fileHeader = await _context.FileHeaders.SingleAsync(x => x.FileHeaderId == fileHeaderId);
 
-      var fileHeader = await _context.FileHeaders.SingleAsync(x => x.FileHeaderId == fileHeaderId);
-
-      _context.Remove(fileHeader);
-      await _context.SaveChangesAsync();
+        _context.Remove(fileHeader);
+        await _context.SaveChangesAsync();
+      }
     }
   }
 }

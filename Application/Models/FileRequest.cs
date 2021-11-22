@@ -6,6 +6,8 @@ namespace Application.Models
   public class FileRequest
   {
     public IFormFile FileHeader { get; set; }
+    public IFormFile FileBody { get; set; }
+    public IFormFile FileFooter { get; set; }
     public IEnumerable<IFormFile> FileAttachments { get; set; }
   }
 }

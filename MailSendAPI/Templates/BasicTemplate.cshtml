@@ -2,14 +2,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-</head>
-<body>
-    <div class="logo">
-        <h2>Basic template </h2>@Model.Data
-    </div>
+    <style>
+        #header, #headerImg{
+            width: 1000px;
+            height: 300px;
+        }
+        #body, #bodyImg{
+            width: 1000px;
+            height: 500px;
+        }
+        #footer, #footerImg{
+            width: 1000px;
+            height: 200px;
+        }
+        .centre, .welcome{
+            margin: 0 auto;
+            display: block;
+        }
 
-    <div class="body">
-        <img src="cid:@Model.FileHeaderData" />
+        .welcome{
+            padding: 30px;
+            font-size: 24px;
+        }
+
+    </style>
+</head>
+<body style="background-color: darkgrey;">
+    <div class="logo">
+        <h2>Test template mail sent to </h2>@Model.Data
+    </div>
+    <div class="welcome" >
+        Hello @Model.FirstName @Model.LastName!
+    </div>
+    <div id="header" class="centre">
+        <img id="headerImg"  src="cid:@Model.FileHeaderData" />
+    </div>
+    <div id="body" class="centre">
+        <img id="bodyImg"  src="cid:@Model.FileBodyData" />
+    </div>
+    <div id="footer" class="centre">
+        <img id="footerImg" src="cid:@Model.FileFooterData" />
     </div>
 </body>
 </html>

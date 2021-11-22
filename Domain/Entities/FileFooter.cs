@@ -2,26 +2,25 @@
 
 namespace Domain.Entities
 {
-  public class FileHeader
+  public class FileFooter
   {
-    public FileHeader()
+    public FileFooter()
     {
 
     }
 
-    public FileHeader(string FileName, string ContentType, byte[] DataFiles)
+    public FileFooter(string FileName, string ContentType, byte[] DataFiles)
     {
       this.FileName = FileName;
       this.ContentType = ContentType;
       this.DataFiles = DataFiles;
     }
 
-    public Guid? FileHeaderId { get; set; }
+    public Guid? FileFooterId { get; set; }
     public string FileName { get; set; }
     public string ContentType { get; set; }
     public byte[] DataFiles { get; set; }
 
     public virtual Files Files { get; set; }
-
   }
 }

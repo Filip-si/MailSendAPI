@@ -13,6 +13,8 @@ namespace Infrastructure
 
     public DbSet<FileAttachment> FileAttachments { get; set; }
     public DbSet<FileHeader> FileHeaders { get; set; }
+    public DbSet<FileBody> FileBodies { get; set; }
+    public DbSet<FileFooter> FileFooters { get; set; }
     public DbSet<Files> Files { get; set; }
 
     public DbSet<Template> Templates { get; set; }

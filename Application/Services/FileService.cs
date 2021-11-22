@@ -14,12 +14,21 @@ namespace Application.Services
   {
     private readonly DatabaseContext _context;
     private readonly IFileHeaderService _fileHeaderService;
+    private readonly IFileBodyService _fileBodyService;
+    private readonly IFileFooterService _fileFooterService;
     private readonly IFileAttachmentService _fileAttachmentService;
 
-    public FileService(DatabaseContext context, IFileHeaderService fileHeaderService, IFileAttachmentService fileAttachmentService)
+    public FileService(
+      DatabaseContext context, 
+      IFileHeaderService fileHeaderService, 
+      IFileBodyService fileBodyService, 
+      IFileFooterService fileFooterService,
+      IFileAttachmentService fileAttachmentService)
     {
       _context = context;
       _fileHeaderService = fileHeaderService;
+      _fileBodyService = fileBodyService;
+      _fileFooterService = fileFooterService;
       _fileAttachmentService = fileAttachmentService;
     }
 
@@ -34,7 +43,9 @@ namespace Application.Services
       {
         var newFiles = new Files()
         {
-          FileHeaderId = files.FileHeaderId
+          FileHeaderId = files.FileHeaderId,
+          FileBodyId = files.FileBodyId,
+          FileFooterId = files.FileFooterId
         };
 
         await _context.AddAsync(newFiles);
@@ -67,6 +78,8 @@ namespace Application.Services
         _context.Remove(files);
 
         await _fileHeaderService.DeleteFileHeader(files.FileHeaderId);
+        await _fileBodyService.DeleteFileBody(files.FileBodyId);
+        await _fileFooterService.DeleteFileFooter(files.FileFooterId);
         await _context.SaveChangesAsync();
       }
       catch (Exception)
