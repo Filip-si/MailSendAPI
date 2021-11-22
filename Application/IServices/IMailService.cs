@@ -1,13 +1,11 @@
-﻿using Application.Models;
-using Application.Models.Templates;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Application.IServices
 {
   public interface IMailService
   {
-    Task SendMailMessage(MailRequest request);
-
-    Task SendEmailFromTemplate(BasicModel templateModel, string recepient);
+    Task SendEmailTemplate(Guid templateId, ICollection<string> recepients);
   }
 }

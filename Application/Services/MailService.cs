@@ -1,94 +1,98 @@
-﻿//using Application.IServices;
-//using Application.Models;
-//using Application.Models.Templates;
-//using Domain.Entities;
-//using FluentEmail.Core;
-//using Infrastructure;
-//using Infrastructure.Extensions;
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.EntityFrameworkCore;
-//using Microsoft.Extensions.Configuration;
-//using System;
-//using System.Collections.Generic;
-//using System.IO;
-//using System.Linq;
-//using System.Net;
-//using System.Net.Mail;
-//using System.Text;
-//using System.Threading.Tasks;
+﻿using Application.IServices;
+using Application.Models.Templates;
+using FluentEmail.Core;
+using FluentEmail.Core.Models;
+using Infrastructure;
+using Infrastructure.Extensions;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
-//namespace Application.Services
-//{
-//  public class MailService : IMailService
-//  {
-//    private readonly IFluentEmail _fluentEmail;
-//    private readonly IConfiguration _configuration;
-//    private readonly DatabaseContext _context;
-//    private readonly IMessageService _messageService;
+namespace Application.Services
+{
+  public class MailService : IMailService
+  {
+    private readonly IFluentEmail _fluentEmail;
+    private readonly DatabaseContext _context;
 
-//    public MailService(IFluentEmail fluentEmail, IConfiguration configuration, DatabaseContext context, IMessageService messageService)
-//    {
-//      _fluentEmail = fluentEmail;
-//      _configuration = configuration;
-//      _context = context;
-//      _messageService = messageService;
-//    }
+    public MailService(IFluentEmail fluentEmail, DatabaseContext context)
+    {
+      _fluentEmail = fluentEmail;
+      _context = context;
+    }
 
-//    public async Task SendMailMessage(MailRequest request)
-//    {
-//      try
-//      {
-//        MailMessage message = new(
-//          request.From,
-//          request.To,
-//          request.Subject,
-//          request.Body);
-//        message.BodyEncoding = Encoding.UTF8;
-//        message.IsBodyHtml = true;
-//        await SmtpClientConfig().SendMailAsync(message);
-//      }
-//      catch (Exception)
-//      {
-//        throw;
-//      }
-//    }
+    public async Task SendEmailTemplate(Guid templateId, ICollection<string> recepients)
+    {
+      await _context.Templates.AsNoTracking()
+        .IsAnyRuleAsync(x => x.TemplateId == templateId);
 
-//    public async Task SendEmailFromTemplate(BasicModel templateModel, string recepient)
-//    {
-//      var file = templateModel.File;
+      var template = await _context.Templates.AsNoTracking()
+        .Include(x => x.Files)
+        .SingleAsync(x => x.TemplateId == templateId);
 
-//      var email = _fluentEmail
-//          .To(recepient)
-//          .Subject("temat")
-//          .UsingTemplateFromFile(
-//          Path.Combine($"{Directory.GetCurrentDirectory()}/Templates/BasicTemplate.cshtml"),
-//          new BasicModel
-//          {
-//            Data = templateModel.Data,
-//            File = templateModel.File
-//          });
-//      var stream = System.IO.File.OpenRead(file.FileName);
-//      email.Attach(new FluentEmail.Core.Models.Attachment()
-//      {
-//        Filename = file.FileName,
-//        ContentType = file.ContentType,
-//        Data = stream,
-//        IsInline = true
-//      });
-//      await email.SendAsync();
-//    }
+      var files = template.Files;
 
-//    private SmtpClient SmtpClientConfig()
-//    {
-//      SmtpClient client = new(_configuration["EmailConfigurations:Host"], int.Parse(_configuration["EmailConfigurations:Port"]));
-//      NetworkCredential creds = new(_configuration["EmailConfigurations:From"], _configuration["EmailConfigurations:Password"]);
-//      client.EnableSsl = bool.Parse(_configuration["EmailConfigurations:EnableSsl"]);
-//      client.UseDefaultCredentials = bool.Parse(_configuration["EmailConfigurations:UseDefaultCredentials"]);
-//      client.DeliveryMethod = SmtpDeliveryMethod.Network;
-//      client.Credentials = creds;
-//      return client;
-//    }
+      var headerFile = await _context.FileHeaders.AsNoTracking()
+        .SingleAsync(x => x.FileHeaderId == files.FileHeaderId);
+
+      var attachmentFiles = await _context.FileAttachments.AsNoTracking()
+        .Where(x => x.FilesId == template.FilesId)
+        .ToListAsync();
+
+      foreach (var recepient in recepients)
+      {
+        var headerAttachment = GetImageInline(new MemoryStream(headerFile.DataFiles), headerFile.ContentType, headerFile.FileName);
+
+        var attachments = new List<Attachment>();
+        foreach (var attachment in attachmentFiles)
+        {
+          attachments.Add(GetAttachment(new MemoryStream(attachment.DataFiles), attachment.ContentType, attachment.FileName));
+        }
+
+        var email = _fluentEmail
+          .To(recepient)
+          .Subject("temat")
+          .UsingTemplateFromFile(
+          Path.Combine($"{Directory.GetCurrentDirectory()}/Templates/BasicTemplate.cshtml"),
+          new BasicModel
+          {
+            Data = recepient,
+            FileHeaderData = headerAttachment.ContentId
+          })
+          .Attach(attachments)
+          .Attach(headerAttachment);
+
+        await email.SendAsync();
+      }
+    }
+
+    private static Attachment GetImageInline(Stream stream, string contentType, string fileName)
+    {
+      return new Attachment
+      {
+        Data = stream,
+        ContentType = contentType,
+        Filename = fileName,
+        ContentId = Guid.NewGuid().ToString(),
+        IsInline = true
+      };
+    }
+
+    private static Attachment GetAttachment(Stream stream, string contentType, string fileName)
+    {
+      return new Attachment
+      {
+        Data = stream,
+        ContentType = contentType,
+        Filename = fileName,
+        ContentId = Guid.NewGuid().ToString(),
+        IsInline = false
+      };
+    }
 
 
-//  }
-//}
+  }
+}

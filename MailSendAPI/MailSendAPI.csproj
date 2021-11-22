@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <None Include="Templates\BasicTemplate.cshtml" />
-    <None Include="Templates\ExampleTemplate.cshtml" />
   </ItemGroup>
 
   <ItemGroup>

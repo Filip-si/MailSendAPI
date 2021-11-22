@@ -38,7 +38,7 @@ namespace MailSendAPI
       services.AddScoped<IFileService, FileService>();
       services.AddScoped<ITemplateService, TemplateService>();
       //services.AddScoped<IMessageService, MessageService>();
-      //services.AddScoped<IMailService, MailService>();
+      services.AddScoped<IMailService, MailService>();
       services.AddControllers(opt =>
       {
         opt.Filters.Add(new BusinessExceptionFilter(Logger));

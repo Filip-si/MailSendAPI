@@ -1,9 +1,9 @@
 ﻿using Application.IServices;
-using Application.Models;
-using Application.Models.Templates;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MailSendAPI.Controllers
@@ -22,18 +22,9 @@ namespace MailSendAPI.Controllers
     [HttpPost]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> SendMailMessage(MailRequest request)
+    public async Task<IActionResult> SendEmailTemplate(Guid templateId, [BindRequired] ICollection<string> recepient)
     {
-      await _mailService.SendMailMessage(request);
-      return StatusCode(StatusCodes.Status201Created);
-    }
-
-    [HttpPost("template")]
-    [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> SendEmailFromTemplate([FromForm] BasicModel basicModel, [BindRequired] string recepient)
-    {
-      await _mailService.SendEmailFromTemplate(basicModel, recepient);
+      await _mailService.SendEmailTemplate(templateId, recepient);
       return StatusCode(StatusCodes.Status201Created);
     }
   }
