@@ -7,8 +7,8 @@ namespace Application.IServices
 {
   public interface IMailService
   {
-    Task SendEmailHtmlTemplate(Guid templateId, ICollection<Recepient> recepients);
+    Task SendEmailHtmlTemplate(Guid templateId, ICollection<RecepientRequest> recepients);
 
-    Task SendEmailTemplateNewsletter(Guid templateId, ICollection<Recepient> recepients);
+    Task SendEmailTemplateNewsletter(Guid templateId, ICollection<RecepientRequest> recepients);
   }
 }
