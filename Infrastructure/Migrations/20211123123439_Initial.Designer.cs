@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20211119091728_Initial")]
+    [Migration("20211123123439_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,7 +36,7 @@ namespace Infrastructure.Migrations
                     b.Property<string>("FileName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("FilesId")
+                    b.Property<Guid?>("FilesId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("FileAttachmentId");
@@ -44,6 +44,46 @@ namespace Infrastructure.Migrations
                     b.HasIndex("FilesId");
 
                     b.ToTable("FileAttachments");
+                });
+
+            modelBuilder.Entity("Domain.Entities.FileBody", b =>
+                {
+                    b.Property<Guid?>("FileBodyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("DataFiles")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("FileBodyId");
+
+                    b.ToTable("FileBodies");
+                });
+
+            modelBuilder.Entity("Domain.Entities.FileFooter", b =>
+                {
+                    b.Property<Guid?>("FileFooterId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("DataFiles")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("FileFooterId");
+
+                    b.ToTable("FileFooters");
                 });
 
             modelBuilder.Entity("Domain.Entities.FileHeader", b =>
@@ -72,10 +112,24 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("FileBodyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("FileFooterId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("FileHeaderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("FilesId");
+
+                    b.HasIndex("FileBodyId")
+                        .IsUnique()
+                        .HasFilter("[FileBodyId] IS NOT NULL");
+
+                    b.HasIndex("FileFooterId")
+                        .IsUnique()
+                        .HasFilter("[FileFooterId] IS NOT NULL");
 
                     b.HasIndex("FileHeaderId")
                         .IsUnique()
@@ -93,13 +147,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DataTemplate")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid?>("FilesId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("From")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("To")
+                    b.Property<string>("TextTemplate")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("TemplateId");
@@ -115,18 +169,28 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.Files", "Files")
                         .WithMany("FilesAttachments")
-                        .HasForeignKey("FilesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("FilesId");
 
                     b.Navigation("Files");
                 });
 
             modelBuilder.Entity("Domain.Entities.Files", b =>
                 {
+                    b.HasOne("Domain.Entities.FileBody", "FileBody")
+                        .WithOne("Files")
+                        .HasForeignKey("Domain.Entities.Files", "FileBodyId");
+
+                    b.HasOne("Domain.Entities.FileFooter", "FileFooter")
+                        .WithOne("Files")
+                        .HasForeignKey("Domain.Entities.Files", "FileFooterId");
+
                     b.HasOne("Domain.Entities.FileHeader", "FileHeader")
                         .WithOne("Files")
                         .HasForeignKey("Domain.Entities.Files", "FileHeaderId");
+
+                    b.Navigation("FileBody");
+
+                    b.Navigation("FileFooter");
 
                     b.Navigation("FileHeader");
                 });
@@ -137,6 +201,16 @@ namespace Infrastructure.Migrations
                         .WithOne("Template")
                         .HasForeignKey("Domain.Entities.Template", "FilesId");
 
+                    b.Navigation("Files");
+                });
+
+            modelBuilder.Entity("Domain.Entities.FileBody", b =>
+                {
+                    b.Navigation("Files");
+                });
+
+            modelBuilder.Entity("Domain.Entities.FileFooter", b =>
+                {
                     b.Navigation("Files");
                 });
 

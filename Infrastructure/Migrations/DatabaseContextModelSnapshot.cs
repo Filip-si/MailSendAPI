@@ -145,13 +145,13 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DataTemplate")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid?>("FilesId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("From")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("To")
+                    b.Property<string>("TextTemplate")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("TemplateId");

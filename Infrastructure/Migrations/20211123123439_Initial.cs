@@ -8,6 +8,34 @@ namespace Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "FileBodies",
+                columns: table => new
+                {
+                    FileBodyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DataFiles = table.Column<byte[]>(type: "varbinary(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FileBodies", x => x.FileBodyId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FileFooters",
+                columns: table => new
+                {
+                    FileFooterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DataFiles = table.Column<byte[]>(type: "varbinary(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FileFooters", x => x.FileFooterId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "FileHeaders",
                 columns: table => new
                 {
@@ -26,11 +54,25 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     FilesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FileHeaderId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    FileHeaderId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    FileBodyId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    FileFooterId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Files", x => x.FilesId);
+                    table.ForeignKey(
+                        name: "FK_Files_FileBodies_FileBodyId",
+                        column: x => x.FileBodyId,
+                        principalTable: "FileBodies",
+                        principalColumn: "FileBodyId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Files_FileFooters_FileFooterId",
+                        column: x => x.FileFooterId,
+                        principalTable: "FileFooters",
+                        principalColumn: "FileFooterId",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Files_FileHeaders_FileHeaderId",
                         column: x => x.FileHeaderId,
@@ -47,7 +89,7 @@ namespace Infrastructure.Migrations
                     FileName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ContentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DataFiles = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
-                    FilesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    FilesId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -57,7 +99,7 @@ namespace Infrastructure.Migrations
                         column: x => x.FilesId,
                         principalTable: "Files",
                         principalColumn: "FilesId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -65,8 +107,8 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     TemplateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    From = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    To = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TextTemplate = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DataTemplate = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
                     FilesId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
@@ -85,6 +127,20 @@ namespace Infrastructure.Migrations
                 name: "IX_FileAttachments_FilesId",
                 table: "FileAttachments",
                 column: "FilesId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Files_FileBodyId",
+                table: "Files",
+                column: "FileBodyId",
+                unique: true,
+                filter: "[FileBodyId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Files_FileFooterId",
+                table: "Files",
+                column: "FileFooterId",
+                unique: true,
+                filter: "[FileFooterId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Files_FileHeaderId",
@@ -111,6 +167,12 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Files");
+
+            migrationBuilder.DropTable(
+                name: "FileBodies");
+
+            migrationBuilder.DropTable(
+                name: "FileFooters");
 
             migrationBuilder.DropTable(
                 name: "FileHeaders");

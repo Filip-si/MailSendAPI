@@ -12,19 +12,15 @@ namespace Infrastructure.EntityTypeConfiguration
       builder.Property(x => x.TemplateId)
         .IsRequired();
 
-      builder.Property(x => x.From)
-        .HasMaxLength(100);
+      builder.Property(x => x.DataTemplate)
+        .HasMaxLength(1000);
 
-      builder.Property(x => x.To)
-        .HasMaxLength(100);
+      builder.Property(x => x.TextTemplate)
+        .HasMaxLength(1000);
 
       builder.HasOne(x => x.Files)
         .WithOne(y => y.Template)
         .HasForeignKey<Template>(y => y.FilesId);
-
-      //builder.HasOne(x => x.Message)
-      //  .WithOne(y => y.Template)
-      //  .HasForeignKey<Template>(y => y.MessageId);
     }
   }
 }
