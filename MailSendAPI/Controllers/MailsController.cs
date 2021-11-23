@@ -1,4 +1,5 @@
 ﻿using Application.IServices;
+using Application.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -19,12 +20,22 @@ namespace MailSendAPI.Controllers
       _mailService = mailService;
     }
 
-    [HttpPost]
+    [HttpPost("html-template")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> SendEmailTemplate(Guid templateId, [BindRequired] ICollection<string> recepient)
+    public async Task<IActionResult> SendEmailHtmlTemplate(Guid templateId, [BindRequired] ICollection<RecepientRequest> recepients)
     {
-      await _mailService.SendEmailTemplate(templateId, recepient);
+      await _mailService.SendEmailHtmlTemplate(templateId, recepients);
+      return StatusCode(StatusCodes.Status201Created);
+    }
+
+
+    [HttpPost("newsletter-template")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    public async Task<IActionResult> SendEmailTemplateNewsletter(Guid templateId, [BindRequired] ICollection<RecepientRequest> recepients)
+    {
+      await _mailService.SendEmailTemplateNewsletter(templateId, recepients);
       return StatusCode(StatusCodes.Status201Created);
     }
   }
