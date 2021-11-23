@@ -1,0 +1,40 @@
+﻿@model Application.Models.Templates.NewsletterModel 
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #body, #bodyImg {
+            width: 1200px;
+            height: 800px;
+        }
+
+        #footer, #footerImg {
+            width: 1200px;
+            height: 200px;
+        }
+
+        .centre, .welcome {
+            margin: 0 auto;
+            display: block;
+        }
+
+        .welcome {
+            padding: 30px;
+            font-size: 28px;
+            font-family: Verdana;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body style="background-color: azure;">
+    <div class="welcome">
+        Hello @Model.FirstName @Model.LastName!
+    </div>
+    <div id="body" class="centre">
+        <img id="bodyImg" src="cid:@Model.FileBodyData" />
+    </div>
+    <div id="footer" class="centre">
+        <img id="footerImg" src="cid:@Model.FileFooterData" />
+    </div>
+</body>
+</html>

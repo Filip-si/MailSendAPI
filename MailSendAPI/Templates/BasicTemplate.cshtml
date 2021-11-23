@@ -15,7 +15,7 @@
             width: 1000px;
             height: 200px;
         }
-        .centre, .welcome{
+        .centre, .welcome, .data, .text{
             margin: 0 auto;
             display: block;
         }
@@ -25,11 +25,25 @@
             font-size: 24px;
         }
 
+        .data {
+            text-decoration: underline;
+            padding: 35px;
+            background-color: #ffd800;
+            font-size: 24px;
+            color: black;
+        }
+
+        .text {
+            font-size: 22px;
+        }
     </style>
 </head>
 <body style="background-color: darkgrey;">
-    <div class="logo">
-        <h2>Test template mail sent to </h2>@Model.Data
+    <div>
+        <a class="data" href="@Model.DataTemplate"><h2>Visit our webiste</h2></a>
+    </div>
+    <div class="text">
+        @Model.TextTemplate
     </div>
     <div class="welcome" >
         Hello @Model.FirstName @Model.LastName!
