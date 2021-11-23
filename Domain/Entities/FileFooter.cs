@@ -17,8 +17,11 @@ namespace Domain.Entities
     }
 
     public Guid? FileFooterId { get; set; }
+
     public string FileName { get; set; }
+
     public string ContentType { get; set; }
+
     public byte[] DataFiles { get; set; }
 
     public virtual Files Files { get; set; }

@@ -16,11 +16,15 @@ namespace Domain.Entities
     }
 
     public Guid? FileAttachmentId { get; set; }
+
     public string FileName { get; set; }
+
     public string ContentType { get; set; }
+
     public byte[] DataFiles { get; set; }
 
     public Guid? FilesId { get; set; }
+
     public virtual Files Files { get; set; }
   }
 }

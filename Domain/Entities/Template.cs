@@ -8,25 +8,21 @@ namespace Domain.Entities
     {
 
     }
-    public Template(string From, string To, Guid FilesId, DateTime CreatedOn)
+    public Template(string TextTemplate, string DataTemplate, Guid FilesId, DateTime CreatedOn)
     {
-      this.From = From;
-      this.To = To;
+      this.TextTemplate = TextTemplate;
+      this.DataTemplate = DataTemplate;
       this.FilesId = FilesId;
       this.CreatedOn = CreatedOn;
     }
 
     public Guid TemplateId { get; set; }
 
-    public string From { get; set; }
+    public string TextTemplate { get; set; }
 
-    public string To { get; set; }
+    public string DataTemplate { get; set; }
 
     public DateTime CreatedOn { get; set; }
-
-    //public Guid MessageId { get; set; }
-
-    //public virtual Message Message { get; set; }
 
     public Guid? FilesId { get; set; }
 
