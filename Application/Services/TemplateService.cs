@@ -27,11 +27,8 @@ namespace Application.Services
 
     public async Task<IEnumerable<TemplateResponse>> GetTemplatesHtml()
     {
-      return await _context.Templates
-        .Where(x =>
-        x.Files.FileHeaderId.HasValue && 
-        x.Files.FileBodyId.HasValue && 
-        x.Files.FileFooterId.HasValue)
+      return await _context.Templates.AsNoTracking()
+        .Where(x => x.Files.FileHeaderId.HasValue)
         .Select(response => new TemplateResponse
         {
           TemplateId = response.TemplateId,
@@ -39,35 +36,31 @@ namespace Application.Services
           TextTemplate = response.TextTemplate,
           FilesId = response.FilesId
         })
-        .AsNoTracking()
         .ToListAsync();
     }
 
     public async Task<IEnumerable<TemplateResponse>> GetTemplatesNewsletter()
     {
-      return await _context.Templates
-        .Where(x =>
-        !x.Files.FileHeaderId.HasValue &&
-        x.Files.FileBodyId.HasValue &&
-        x.Files.FileFooterId.HasValue)
+      return await _context.Templates.AsNoTracking()
+        .Where(x => !x.Files.FileHeaderId.HasValue)
         .Select(response => new TemplateResponse
         {
           TemplateId = response.TemplateId,
           FilesId = response.FilesId
         })
-        .AsNoTracking()
         .ToListAsync();
     }
 
     public async Task<IEnumerable<TemplateResponse>> GetTemplates()
     {
-      return await _context.Templates
+      return await _context.Templates.AsNoTracking()
         .Select(response => new TemplateResponse
         {
           TemplateId = response.TemplateId,
+          DataTemplate = response.DataTemplate,
+          TextTemplate = response.TextTemplate,
           FilesId = response.FilesId
         })
-        .AsNoTracking()
         .ToListAsync();
     }
 
