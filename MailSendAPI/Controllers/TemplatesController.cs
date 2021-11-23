@@ -50,7 +50,7 @@ namespace MailSendAPI.Controllers
     [HttpPost("html-template")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesDefaultResponseType(typeof(Guid))]
-    public async Task<IActionResult> AddTemplateHtml([FromQuery] DataRequest dataRequest, [FromForm] FileRequest fileRequest)
+    public async Task<IActionResult> AddTemplateHtml([FromQuery] DataRequest dataRequest, [FromForm] FileToHtmlTemplateRequest fileRequest)
     {
       var templateId = await _templateService.AddTemplateHtml(fileRequest, dataRequest);
       return StatusCode(StatusCodes.Status201Created, templateId);
@@ -59,7 +59,7 @@ namespace MailSendAPI.Controllers
     [HttpPost("newsletter-template")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesDefaultResponseType(typeof(Guid))]
-    public async Task<IActionResult> AddTemplateNewsletter([FromForm] FileNewsletterRequest fileNewsletterRequest)
+    public async Task<IActionResult> AddTemplateNewsletter([FromForm] FileToNewsletterTemplateRequest fileNewsletterRequest)
     {
       var templateId = await _templateService.AddTemplateNewsletter(fileNewsletterRequest);
       return StatusCode(StatusCodes.Status201Created, templateId);

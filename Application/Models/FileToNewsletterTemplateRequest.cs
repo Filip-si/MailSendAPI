@@ -2,7 +2,7 @@
 
 namespace Application.Models
 {
-  public class FileNewsletterRequest
+  public class FileToNewsletterTemplateRequest
   {
     public IFormFile FileBody { get; set; }
     public IFormFile FileFooter { get; set; }

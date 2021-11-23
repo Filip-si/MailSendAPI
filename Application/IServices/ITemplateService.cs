@@ -13,9 +13,9 @@ namespace Application.IServices
 
     Task<IEnumerable<TemplateResponse>> GetTemplatesNewsletter();
 
-    Task<Guid> AddTemplateHtml(FileRequest fileRequest, DataRequest dataRequest);
+    Task<Guid> AddTemplateHtml(FileToHtmlTemplateRequest fileRequest, DataRequest dataRequest);
 
-    Task<Guid> AddTemplateNewsletter(FileNewsletterRequest fileRequest);
+    Task<Guid> AddTemplateNewsletter(FileToNewsletterTemplateRequest fileRequest);
 
     Task DeleteTemplate(Guid templateId);
   }

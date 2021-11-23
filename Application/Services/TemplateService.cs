@@ -71,7 +71,7 @@ namespace Application.Services
         .ToListAsync();
     }
 
-    public async Task<Guid> AddTemplateHtml(FileRequest fileRequest, DataRequest dataRequest)
+    public async Task<Guid> AddTemplateHtml(FileToHtmlTemplateRequest fileRequest, DataRequest dataRequest)
     {
       await using var transaction = await _context.Database.BeginTransactionAsync();
       try
@@ -117,7 +117,7 @@ namespace Application.Services
       }
     }
 
-    public async Task<Guid> AddTemplateNewsletter(FileNewsletterRequest fileNewsletterRequest)
+    public async Task<Guid> AddTemplateNewsletter(FileToNewsletterTemplateRequest fileNewsletterRequest)
     {
       await using var transaction = await _context.Database.BeginTransactionAsync();
       try

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Application.Models
 {
-  public class FileRequest
+  public class FileToHtmlTemplateRequest
   {
     public IFormFile FileHeader { get; set; }
     public IFormFile FileBody { get; set; }
