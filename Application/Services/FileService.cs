@@ -66,9 +66,12 @@ namespace Application.Services
         await _context.Files.AsNoTracking()
           .IsAnyRuleAsync(x => x.FilesId == filesId);
 
-        var files = await _context.Files.AsNoTracking().SingleAsync(x => x.FilesId == filesId);
+        var files = await _context.Files.AsNoTracking()
+          .SingleAsync(x => x.FilesId == filesId);
 
-        var filesAttachments = await _context.FileAttachments.Where(x => x.FilesId == files.FilesId).ToListAsync();
+        var filesAttachments = await _context.FileAttachments
+          .Where(x => x.FilesId == files.FilesId)
+          .ToListAsync();
 
         foreach (var attachment in filesAttachments)
         {
@@ -76,10 +79,10 @@ namespace Application.Services
         }
 
         _context.Remove(files);
-
         await _fileHeaderService.DeleteFileHeader(files.FileHeaderId);
         await _fileBodyService.DeleteFileBody(files.FileBodyId);
         await _fileFooterService.DeleteFileFooter(files.FileFooterId);
+
         await _context.SaveChangesAsync();
       }
       catch (Exception)

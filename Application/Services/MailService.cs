@@ -29,49 +29,23 @@ namespace Application.Services
 
     public async Task SendEmailHtmlTemplate(Guid templateId, ICollection<RecepientRequest> recepients)
     {
-      await _context.Templates.AsNoTracking()
-        .IsAnyRuleAsync(x => x.TemplateId == templateId);
+      var template = await ReturnsTemplateIfExists(templateId);
 
-      var template = await _context.Templates.AsNoTracking()
-        .Include(x => x.Files)
-        .SingleAsync(x => x.TemplateId == templateId);
-
-      if(!template.FilesId.HasValue || 
+      if (!template.FilesId.HasValue || 
         !template.Files.FileHeaderId.HasValue || 
         !template.Files.FileBodyId.HasValue || 
         !template.Files.FileFooterId.HasValue)
       {
         throw new BusinessException("Wrong templateId for set values","409");
       }
-      
-      var headerFile = await _context.FileHeaders.AsNoTracking()
-          .SingleAsync(x => x.FileHeaderId == template.Files.FileHeaderId);
-      var headerAttachment = GetImageInline(new MemoryStream(headerFile.DataFiles), headerFile.ContentType, headerFile.FileName);
-     
-      var bodyFile = await _context.FileBodies.AsNoTracking()
-          .SingleAsync(x => x.FileBodyId == template.Files.FileBodyId);
-      var bodyAttachment = GetImageInline(new MemoryStream(bodyFile.DataFiles), bodyFile.ContentType, bodyFile.FileName);
-      
-      var footerFile = await _context.FileFooters.AsNoTracking()
-          .SingleAsync(x => x.FileFooterId == template.Files.FileFooterId);
-      var footerAttachment = GetImageInline(new MemoryStream(footerFile.DataFiles), footerFile.ContentType, footerFile.FileName);
 
-      var attachmentsFiles = new List<FileAttachment>();
-      if(await _context.FileAttachments.AnyAsync(x => x.FilesId == template.FilesId))
-      {
-        attachmentsFiles = await _context.FileAttachments.AsNoTracking()
-          .Where(x => x.FilesId == template.FilesId)
-          .ToListAsync();
-      }
+      var headerAttachment = await GetHeaderAttachment(template);
+      var bodyAttachment = await GetBodyAttachment(template);
+      var footerAttachment = await GetFooterAttachment(template);
+      var attachments = await GetEmailAttachments(template);
 
       foreach (var recepient in recepients)
       {
-        var attachments = new List<Attachment>();
-        foreach (var attachment in attachmentsFiles)
-        {
-          attachments.Add(GetAttachment(new MemoryStream(attachment.DataFiles), attachment.ContentType, attachment.FileName));
-        }
-
         var email = _fluentEmail
           .To(recepient.Email)
           .Subject("temat")
@@ -99,12 +73,7 @@ namespace Application.Services
 
     public async Task SendEmailTemplateNewsletter(Guid templateId, ICollection<RecepientRequest> recepients)
     {
-      await _context.Templates.AsNoTracking()
-        .IsAnyRuleAsync(x => x.TemplateId == templateId);
-
-      var template = await _context.Templates.AsNoTracking()
-        .Include(x => x.Files)
-        .SingleAsync(x => x.TemplateId == templateId);
+      var template = await ReturnsTemplateIfExists(templateId);
 
       if (template.Files.FileHeaderId.HasValue ||
           await _context.FileAttachments.AnyAsync(x => x.FilesId == template.FilesId))
@@ -112,21 +81,8 @@ namespace Application.Services
         throw new BusinessException("Wrong templateId for set values", "409");
       }
 
-      var bodyAttachment = new Attachment();
-      if (template.Files.FileBodyId.HasValue)
-      {
-        var bodyFile = await _context.FileBodies.AsNoTracking()
-          .SingleAsync(x => x.FileBodyId == template.Files.FileBodyId);
-        bodyAttachment = GetImageInline(new MemoryStream(bodyFile.DataFiles), bodyFile.ContentType, bodyFile.FileName);
-      }
-
-      var footerAttachment = new Attachment();
-      if (template.Files.FileFooterId.HasValue)
-      {
-        var footerFile = await _context.FileFooters.AsNoTracking()
-          .SingleAsync(x => x.FileFooterId == template.Files.FileFooterId);
-        footerAttachment = GetImageInline(new MemoryStream(footerFile.DataFiles), footerFile.ContentType, footerFile.FileName);
-      }
+      var bodyAttachment = await GetBodyAttachment(template);
+      var footerAttachment = await GetFooterAttachment(template);
 
       foreach (var recepient in recepients)
       {
@@ -174,6 +130,53 @@ namespace Application.Services
       };
     }
 
+    private async Task<Attachment> GetHeaderAttachment(Template template)
+    {
+      var headerFile = await _context.FileHeaders.AsNoTracking()
+          .SingleAsync(x => x.FileHeaderId == template.Files.FileHeaderId);
+      return GetImageInline(new MemoryStream(headerFile.DataFiles), headerFile.ContentType, headerFile.FileName);
+    }
 
+    private async Task<Attachment> GetBodyAttachment(Template template)
+    {
+      var bodyFile = await _context.FileBodies.AsNoTracking()
+          .SingleAsync(x => x.FileBodyId == template.Files.FileBodyId);
+      return GetImageInline(new MemoryStream(bodyFile.DataFiles), bodyFile.ContentType, bodyFile.FileName);
+    }
+
+    private async Task<Attachment> GetFooterAttachment(Template template)
+    {
+      var footerFile = await _context.FileFooters.AsNoTracking()
+          .SingleAsync(x => x.FileFooterId == template.Files.FileFooterId);
+      return GetImageInline(new MemoryStream(footerFile.DataFiles), footerFile.ContentType, footerFile.FileName);
+    }
+
+    private async Task<List<Attachment>> GetEmailAttachments(Template template)
+    {
+      var attachmentsFiles = new List<FileAttachment>();
+      if (await _context.FileAttachments.AnyAsync(x => x.FilesId == template.FilesId))
+      {
+        attachmentsFiles = await _context.FileAttachments.AsNoTracking()
+          .Where(x => x.FilesId == template.FilesId)
+          .ToListAsync();
+      }
+
+      var attachments = new List<Attachment>();
+      foreach (var attachment in attachmentsFiles)
+      {
+        attachments.Add(GetAttachment(new MemoryStream(attachment.DataFiles), attachment.ContentType, attachment.FileName));
+      }
+      return attachments;
+    }
+
+    private async Task<Template> ReturnsTemplateIfExists(Guid templateId)
+    {
+      await _context.Templates.AsNoTracking()
+        .IsAnyRuleAsync(x => x.TemplateId == templateId);
+
+      return await _context.Templates.AsNoTracking()
+        .Include(x => x.Files)
+        .SingleAsync(x => x.TemplateId == templateId);
+    }
   }
 }
