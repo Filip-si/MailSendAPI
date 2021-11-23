@@ -9,7 +9,13 @@ namespace Application.IServices
   {
     Task<IEnumerable<TemplateResponse>> GetTemplates();
 
-    Task<Guid> AddTemplate(FileRequest fileRequest, string from, string to);
+    Task<IEnumerable<TemplateResponse>> GetTemplatesHtml();
+
+    Task<IEnumerable<TemplateResponse>> GetTemplatesNewsletter();
+
+    Task<Guid> AddTemplateHtml(FileRequest fileRequest, DataRequest dataRequest);
+
+    Task<Guid> AddTemplateNewsletter(FileNewsletterRequest fileRequest);
 
     Task DeleteTemplate(Guid templateId);
   }
