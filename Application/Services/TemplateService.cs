@@ -1,8 +1,8 @@
 ﻿using Application.IServices;
 using Application.Models;
-using Application.Models.Templates;
 using Domain.Entities;
 using Infrastructure;
+using Infrastructure.Exceptions;
 using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -25,22 +25,61 @@ namespace Application.Services
       _fileService = fileService;
     }
 
-    public async Task<IEnumerable<TemplateResponse>> GetTemplates()
+    public async Task<IEnumerable<TemplateResponse>> GetTemplatesHtml()
     {
       return await _context.Templates
+        .Where(x =>
+        x.Files.FileHeaderId.HasValue && 
+        x.Files.FileBodyId.HasValue && 
+        x.Files.FileFooterId.HasValue)
         .Select(response => new TemplateResponse
         {
-          TemplateId = response.TemplateId
+          TemplateId = response.TemplateId,
+          DataTemplate = response.DataTemplate,
+          TextTemplate = response.TextTemplate,
+          FilesId = response.FilesId
         })
         .AsNoTracking()
         .ToListAsync();
     }
 
-    public async Task<Guid> AddTemplate(FileRequest fileRequest, string from, string to)
+    public async Task<IEnumerable<TemplateResponse>> GetTemplatesNewsletter()
+    {
+      return await _context.Templates
+        .Where(x =>
+        !x.Files.FileHeaderId.HasValue &&
+        x.Files.FileBodyId.HasValue &&
+        x.Files.FileFooterId.HasValue)
+        .Select(response => new TemplateResponse
+        {
+          TemplateId = response.TemplateId,
+          FilesId = response.FilesId
+        })
+        .AsNoTracking()
+        .ToListAsync();
+    }
+
+    public async Task<IEnumerable<TemplateResponse>> GetTemplates()
+    {
+      return await _context.Templates
+        .Select(response => new TemplateResponse
+        {
+          TemplateId = response.TemplateId,
+          FilesId = response.FilesId
+        })
+        .AsNoTracking()
+        .ToListAsync();
+    }
+
+    public async Task<Guid> AddTemplateHtml(FileRequest fileRequest, DataRequest dataRequest)
     {
       await using var transaction = await _context.Database.BeginTransactionAsync();
       try
       {
+        if(fileRequest.FileHeader is null || fileRequest.FileBody is null || fileRequest.FileFooter is null)
+        {
+          throw new BusinessException("The template require fill field (FileHeader, FileBody, FileFooter)", "409");
+        }
         var newTemplate = new Template();
         await _context.AddAsync(newTemplate);
 
@@ -49,27 +88,9 @@ namespace Application.Services
 
         newTemplate.FilesId = newFiles.FilesId;
 
-        var fileHeader = new FileHeader();
-        if(fileRequest.FileHeader != null)
-        {
-          fileHeader = await UploadFileHeaderToTemplateAsync(fileRequest.FileHeader, newTemplate.TemplateId);
-        }
-
-        var fileBody = new FileBody();
-        if (fileRequest.FileBody != null)
-        {
-          fileBody = await UploadFileBodyToTemplateAsync(fileRequest.FileBody, newTemplate.TemplateId);
-        }
-
-        var fileFooter = new FileFooter();
-        if (fileRequest.FileFooter != null)
-        {
-          fileFooter = await UploadFileFooterToTemplateAsync(fileRequest.FileFooter, newTemplate.TemplateId);
-        }
-
-        newFiles.FileHeaderId = fileHeader.FileHeaderId;
-        newFiles.FileBodyId = fileBody.FileBodyId;
-        newFiles.FileFooterId = fileFooter.FileFooterId;
+        newFiles.FileHeaderId = await UploadFileHeaderToTemplateAsync(fileRequest.FileHeader, newTemplate.TemplateId);
+        newFiles.FileBodyId = await UploadFileBodyToTemplateAsync(fileRequest.FileBody, newTemplate.TemplateId);
+        newFiles.FileFooterId = await UploadFileFooterToTemplateAsync(fileRequest.FileFooter, newTemplate.TemplateId);
 
         var fileAttachments = new List<FileAttachment>();
         if (fileRequest.FileAttachments != null)
@@ -81,8 +102,9 @@ namespace Application.Services
           }
         }
 
-        newTemplate.From = from;
-        newTemplate.To = to;
+        newTemplate.CreatedOn = DateTime.Now;
+        newTemplate.DataTemplate = dataRequest.Data;
+        newTemplate.TextTemplate = dataRequest.Text;
 
         await _context.SaveChangesAsync(); 
         await transaction.CommitAsync();
@@ -95,7 +117,39 @@ namespace Application.Services
       }
     }
 
-    private async Task<FileHeader> UploadFileHeaderToTemplateAsync(IFormFile request, Guid templateId)
+    public async Task<Guid> AddTemplateNewsletter(FileNewsletterRequest fileNewsletterRequest)
+    {
+      await using var transaction = await _context.Database.BeginTransactionAsync();
+      try
+      {
+        if (fileNewsletterRequest.FileBody is null || fileNewsletterRequest.FileFooter is null)
+        {
+          throw new BusinessException("The template require fill field (FileBody, FileFooter)", "409");
+        }
+        var newTemplate = new Template();
+        await _context.AddAsync(newTemplate);
+
+        var newFiles = new Files();
+        await _context.AddAsync(newFiles);
+
+        newTemplate.FilesId = newFiles.FilesId;
+
+        newFiles.FileBodyId = await UploadFileBodyToTemplateAsync(fileNewsletterRequest.FileBody, newTemplate.TemplateId);
+        newFiles.FileFooterId = await UploadFileFooterToTemplateAsync(fileNewsletterRequest.FileFooter, newTemplate.TemplateId);
+        newTemplate.CreatedOn = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+        return newTemplate.TemplateId;
+      }
+      catch (Exception)
+      {
+        await transaction.RollbackAsync();
+        throw;
+      }
+    }
+
+    private async Task<Guid?> UploadFileHeaderToTemplateAsync(IFormFile request, Guid templateId)
     {
       var index = request.FileName.LastIndexOf("\\");
       var shortName = request.FileName[(index + 1)..];
@@ -113,10 +167,10 @@ namespace Application.Services
       }
       _context.FileHeaders.Add(fileHeader);
       await _context.SaveChangesAsync();
-      return fileHeader;
+      return fileHeader.FileHeaderId;
     }
 
-    private async Task<FileBody> UploadFileBodyToTemplateAsync(IFormFile request, Guid templateId)
+    private async Task<Guid?> UploadFileBodyToTemplateAsync(IFormFile request, Guid templateId)
     {
       var index = request.FileName.LastIndexOf("\\");
       var shortName = request.FileName[(index + 1)..];
@@ -134,10 +188,10 @@ namespace Application.Services
       }
       _context.FileBodies.Add(fileBody);
       await _context.SaveChangesAsync();
-      return fileBody;
+      return fileBody.FileBodyId;
     }
 
-    private async Task<FileFooter> UploadFileFooterToTemplateAsync(IFormFile request, Guid templateId)
+    private async Task<Guid?> UploadFileFooterToTemplateAsync(IFormFile request, Guid templateId)
     {
       var index = request.FileName.LastIndexOf("\\");
       var shortName = request.FileName[(index + 1)..];
@@ -155,7 +209,7 @@ namespace Application.Services
       }
       _context.FileFooters.Add(fileFooter);
       await _context.SaveChangesAsync();
-      return fileFooter;
+      return fileFooter.FileFooterId;
     }
 
     private async Task<FileAttachment> UploadFileAttachmentToTemplateAsync(IFormFile request, Guid? filesId, Guid templateId)
