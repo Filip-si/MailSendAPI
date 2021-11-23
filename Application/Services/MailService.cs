@@ -27,7 +27,7 @@ namespace Application.Services
       _context = context;
     }
 
-    public async Task SendEmailHtmlTemplate(Guid templateId, ICollection<Recepient> recepients)
+    public async Task SendEmailHtmlTemplate(Guid templateId, ICollection<RecepientRequest> recepients)
     {
       await _context.Templates.AsNoTracking()
         .IsAnyRuleAsync(x => x.TemplateId == templateId);
@@ -97,7 +97,7 @@ namespace Application.Services
     }
 
 
-    public async Task SendEmailTemplateNewsletter(Guid templateId, ICollection<Recepient> recepients)
+    public async Task SendEmailTemplateNewsletter(Guid templateId, ICollection<RecepientRequest> recepients)
     {
       await _context.Templates.AsNoTracking()
         .IsAnyRuleAsync(x => x.TemplateId == templateId);
