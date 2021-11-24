@@ -4,7 +4,6 @@ using Infrastructure;
 using Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -18,25 +17,13 @@ namespace Application.Services
       _context = context;
     }
 
-    public async Task<IEnumerable<FileAttachment>> GetFileAttachments()
-    {
-      return await _context.FileAttachments.AsNoTracking().ToListAsync();
-    }
-
     public async Task<Guid?> SaveFileAttachment(FileAttachment fileAttachment)
     {
-      try
-      {
-        var newFileAttachment = new FileAttachment(fileAttachment.FileName, fileAttachment.ContentType, fileAttachment.DataFiles);
+      var newFileAttachment = new FileAttachment(fileAttachment.FileName, fileAttachment.ContentType, fileAttachment.DataFiles);
 
-        await _context.AddAsync(newFileAttachment);
-        await _context.SaveChangesAsync();
-        return newFileAttachment.FileAttachmentId;
-      }
-      catch (Exception)
-      {
-        throw;
-      }
+      await _context.AddAsync(newFileAttachment);
+      await _context.SaveChangesAsync();
+      return newFileAttachment.FileAttachmentId;
     }
 
     public async Task DeleteFileAttachment(Guid? fileAttachmentId)

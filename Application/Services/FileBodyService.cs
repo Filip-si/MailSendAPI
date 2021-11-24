@@ -3,7 +3,6 @@ using Domain.Entities;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -17,25 +16,13 @@ namespace Application.Services
       _context = context;
     }
 
-    public async Task<IEnumerable<FileBody>> GetFileBodies()
-    {
-      return await _context.FileBodies.AsNoTracking().ToListAsync();
-    }
-
     public async Task<Guid?> SaveFileBody(FileBody fileBody)
     {
-      try
-      {
-        var newFileBody = new FileBody(fileBody.FileName, fileBody.ContentType, fileBody.DataFiles);
+      var newFileBody = new FileBody(fileBody.FileName, fileBody.ContentType, fileBody.DataFiles);
 
-        await _context.AddAsync(newFileBody);
-        await _context.SaveChangesAsync();
-        return newFileBody.FileBodyId;
-      }
-      catch (Exception)
-      {
-        throw;
-      }
+      await _context.AddAsync(newFileBody);
+      await _context.SaveChangesAsync();
+      return newFileBody.FileBodyId;
     }
 
     public async Task DeleteFileBody(Guid? fileBodyId)

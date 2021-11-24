@@ -27,7 +27,7 @@ namespace Application.Services
       _context = context;
     }
 
-    public async Task SendEmailHtmlTemplate(Guid templateId, ICollection<RecepientRequest> recepients)
+    public async Task SendEmailHtmlTemplate(Guid templateId, string subject, ICollection<RecepientRequest> recepients)
     {
       var template = await ReturnsTemplateIfExists(templateId);
 
@@ -48,7 +48,7 @@ namespace Application.Services
       {
         var email = _fluentEmail
           .To(recepient.Email)
-          .Subject("temat")
+          .Subject(subject)
           .UsingTemplateFromFile(
           Path.Combine($"{Directory.GetCurrentDirectory()}/Templates/BasicTemplate.cshtml"),
           new BasicModel
@@ -71,7 +71,7 @@ namespace Application.Services
     }
 
 
-    public async Task SendEmailTemplateNewsletter(Guid templateId, ICollection<RecepientRequest> recepients)
+    public async Task SendEmailTemplateNewsletter(Guid templateId, string subject, ICollection<RecepientRequest> recepients)
     {
       var template = await ReturnsTemplateIfExists(templateId);
 
@@ -89,7 +89,7 @@ namespace Application.Services
 
         var email = _fluentEmail
           .To(recepient.Email)
-          .Subject("newsletter")
+          .Subject(subject)
           .UsingTemplateFromFile(
           Path.Combine($"{Directory.GetCurrentDirectory()}/Templates/NewsletterTemplate.cshtml"),
           new NewsletterModel

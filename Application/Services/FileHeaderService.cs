@@ -24,23 +24,16 @@ namespace Application.Services
 
     public async Task<Guid?> SaveFileHeader(FileHeader fileHeader)
     {
-      try
-      {
-        var newFileHeader = new FileHeader(fileHeader.FileName, fileHeader.ContentType, fileHeader.DataFiles);
+      var newFileHeader = new FileHeader(fileHeader.FileName, fileHeader.ContentType, fileHeader.DataFiles);
 
-        await _context.AddAsync(newFileHeader);
-        await _context.SaveChangesAsync();
-        return newFileHeader.FileHeaderId;
-      }
-      catch (Exception)
-      {
-        throw;
-      }
+      await _context.AddAsync(newFileHeader);
+      await _context.SaveChangesAsync();
+      return newFileHeader.FileHeaderId;
     }
 
     public async Task DeleteFileHeader(Guid? fileHeaderId)
     {
-      if(await _context.FileHeaders.AnyAsync(x => x.FileHeaderId == fileHeaderId))
+      if (await _context.FileHeaders.AnyAsync(x => x.FileHeaderId == fileHeaderId))
       {
         var fileHeader = await _context.FileHeaders.SingleAsync(x => x.FileHeaderId == fileHeaderId);
 

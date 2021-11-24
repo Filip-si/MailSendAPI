@@ -19,9 +19,9 @@ namespace Application.Services
     private readonly IFileAttachmentService _fileAttachmentService;
 
     public FileService(
-      DatabaseContext context, 
-      IFileHeaderService fileHeaderService, 
-      IFileBodyService fileBodyService, 
+      DatabaseContext context,
+      IFileHeaderService fileHeaderService,
+      IFileBodyService fileBodyService,
       IFileFooterService fileFooterService,
       IFileAttachmentService fileAttachmentService)
     {
@@ -39,28 +39,22 @@ namespace Application.Services
 
     public async Task<Guid?> SaveFilesAsync(Files files)
     {
-      try
+      var newFiles = new Files()
       {
-        var newFiles = new Files()
-        {
-          FileHeaderId = files.FileHeaderId,
-          FileBodyId = files.FileBodyId,
-          FileFooterId = files.FileFooterId
-        };
+        FileHeaderId = files.FileHeaderId,
+        FileBodyId = files.FileBodyId,
+        FileFooterId = files.FileFooterId
+      };
 
-        await _context.AddAsync(newFiles);
-        await _context.SaveChangesAsync();
+      await _context.AddAsync(newFiles);
+      await _context.SaveChangesAsync();
 
-        return newFiles.FilesId;
-      }
-      catch (Exception)
-      {
-        throw;
-      }
+      return newFiles.FilesId;
     }
 
     public async Task DeleteFiles(Guid? filesId)
     {
+      await using var transaction = await _context.Database.BeginTransactionAsync();
       try
       {
         await _context.Files.AsNoTracking()
@@ -84,9 +78,11 @@ namespace Application.Services
         await _fileFooterService.DeleteFileFooter(files.FileFooterId);
 
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
       }
       catch (Exception)
       {
+        await transaction.RollbackAsync();
         throw;
       }
     }
