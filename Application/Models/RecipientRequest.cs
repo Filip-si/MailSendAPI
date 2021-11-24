@@ -1,6 +1,6 @@
 ﻿namespace Application.Models
 {
-  public class RecepientRequest
+  public class RecipientRequest
   {
     public string Email { get; set; }
     public string FirstName { get; set; }

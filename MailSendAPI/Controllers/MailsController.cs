@@ -23,9 +23,9 @@ namespace MailSendAPI.Controllers
     [HttpPost("html-template")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> SendEmailHtmlTemplate(Guid templateId, [BindRequired] string subject, [BindRequired] ICollection<RecepientRequest> recepients)
+    public async Task<IActionResult> SendEmailHtmlTemplate(Guid templateId, [BindRequired] string subject, [BindRequired] ICollection<RecipientRequest> recipients)
     {
-      await _mailService.SendEmailHtmlTemplate(templateId, subject, recepients);
+      await _mailService.SendEmailHtmlTemplate(templateId, subject, recipients);
       return StatusCode(StatusCodes.Status201Created);
     }
 
@@ -33,9 +33,9 @@ namespace MailSendAPI.Controllers
     [HttpPost("newsletter-template")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<IActionResult> SendEmailTemplateNewsletter(Guid templateId,[BindRequired] string subject, [BindRequired] ICollection<RecepientRequest> recepients)
+    public async Task<IActionResult> SendEmailTemplateNewsletter(Guid templateId,[BindRequired] string subject, [BindRequired] ICollection<RecipientRequest> recipients)
     {
-      await _mailService.SendEmailTemplateNewsletter(templateId, subject, recepients);
+      await _mailService.SendEmailTemplateNewsletter(templateId, subject, recipients);
       return StatusCode(StatusCodes.Status201Created);
     }
   }

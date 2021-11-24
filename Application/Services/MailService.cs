@@ -27,7 +27,7 @@ namespace Application.Services
       _context = context;
     }
 
-    public async Task SendEmailHtmlTemplate(Guid templateId, string subject, ICollection<RecepientRequest> recepients)
+    public async Task SendEmailHtmlTemplate(Guid templateId, string subject, ICollection<RecipientRequest> recipients)
     {
       var template = await ReturnsTemplateIfExists(templateId);
 
@@ -44,10 +44,10 @@ namespace Application.Services
       var footerAttachment = await GetFooterAttachment(template);
       var attachments = await GetEmailAttachments(template);
 
-      foreach (var recepient in recepients)
+      foreach (var recipient in recipients)
       {
         var email = _fluentEmail
-          .To(recepient.Email)
+          .To(recipient.Email)
           .Subject(subject)
           .UsingTemplateFromFile(
           Path.Combine($"{Directory.GetCurrentDirectory()}/Templates/BasicTemplate.cshtml"),
@@ -55,8 +55,8 @@ namespace Application.Services
           {
             DataTemplate = template.DataTemplate,
             TextTemplate = template.TextTemplate,
-            FirstName = recepient.FirstName,
-            LastName = recepient.LastName,
+            FirstName = recipient.FirstName,
+            LastName = recipient.LastName,
             FileHeaderData = headerAttachment.ContentId,
             FileBodyData = bodyAttachment.ContentId,
             FileFooterData = footerAttachment.ContentId
@@ -71,7 +71,7 @@ namespace Application.Services
     }
 
 
-    public async Task SendEmailTemplateNewsletter(Guid templateId, string subject, ICollection<RecepientRequest> recepients)
+    public async Task SendEmailTemplateNewsletter(Guid templateId, string subject, ICollection<RecipientRequest> recipients)
     {
       var template = await ReturnsTemplateIfExists(templateId);
 
@@ -84,18 +84,18 @@ namespace Application.Services
       var bodyAttachment = await GetBodyAttachment(template);
       var footerAttachment = await GetFooterAttachment(template);
 
-      foreach (var recepient in recepients)
+      foreach (var recipient in recipients)
       {
 
         var email = _fluentEmail
-          .To(recepient.Email)
+          .To(recipient.Email)
           .Subject(subject)
           .UsingTemplateFromFile(
           Path.Combine($"{Directory.GetCurrentDirectory()}/Templates/NewsletterTemplate.cshtml"),
           new NewsletterModel
           {
-            FirstName = recepient.FirstName,
-            LastName = recepient.LastName,
+            FirstName = recipient.FirstName,
+            LastName = recipient.LastName,
             FileBodyData = bodyAttachment.ContentId,
             FileFooterData = footerAttachment.ContentId
           })

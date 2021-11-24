@@ -14,6 +14,14 @@ namespace Infrastructure.EntityTypeConfiguration
       builder.HasOne(x => x.FileHeader)
         .WithOne(y => y.Files)
         .HasForeignKey<Files>(y => y.FileHeaderId);
+
+      builder.HasOne(x => x.FileBody)
+        .WithOne(y => y.Files)
+        .HasForeignKey<Files>(y => y.FileBodyId);
+
+      builder.HasOne(x => x.FileFooter)
+        .WithOne(y => y.Files)
+        .HasForeignKey<Files>(y => y.FileFooterId);
     }
   }
 }
