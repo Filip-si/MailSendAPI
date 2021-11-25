@@ -9,11 +9,11 @@ namespace Domain.Entities
 
     }
 
-    public FileFooter(string FileName, string ContentType, byte[] DataFiles)
+    public FileFooter(string fileName, string contentType, byte[] dataFiles)
     {
-      this.FileName = FileName;
-      this.ContentType = ContentType;
-      this.DataFiles = DataFiles;
+      FileName = fileName;
+      ContentType = contentType;
+      DataFiles = dataFiles;
     }
 
     public Guid? FileFooterId { get; set; }
@@ -24,6 +24,6 @@ namespace Domain.Entities
 
     public byte[] DataFiles { get; set; }
 
-    public virtual Files Files { get; set; }
+    public virtual File Files { get; set; }
   }
 }

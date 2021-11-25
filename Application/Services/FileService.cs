@@ -1,4 +1,5 @@
 ﻿using Application.IServices;
+using Application.Models;
 using Domain.Entities;
 using Infrastructure;
 using Infrastructure.Extensions;
@@ -32,14 +33,9 @@ namespace Application.Services
       _fileAttachmentService = fileAttachmentService;
     }
 
-    public async Task<IEnumerable<Files>> GetFiles()
+    public async Task<Guid?> SaveFilesAsync(File files)
     {
-      return await _context.Files.AsNoTracking().ToListAsync();
-    }
-
-    public async Task<Guid?> SaveFilesAsync(Files files)
-    {
-      var newFiles = new Files()
+      var newFiles = new File()
       {
         FileHeaderId = files.FileHeaderId,
         FileBodyId = files.FileBodyId,

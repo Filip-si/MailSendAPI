@@ -76,7 +76,7 @@ namespace Application.Services
         var newTemplate = new Template();
         await _context.AddAsync(newTemplate);
 
-        var newFiles = new Files();
+        var newFiles = new Domain.Entities.File();
         await _context.AddAsync(newFiles);
 
         newTemplate.FilesId = newFiles.FilesId;
@@ -122,7 +122,7 @@ namespace Application.Services
         var newTemplate = new Template();
         await _context.AddAsync(newTemplate);
 
-        var newFiles = new Files();
+        var newFiles = new Domain.Entities.File();
         await _context.AddAsync(newFiles);
 
         newTemplate.FilesId = newFiles.FilesId;

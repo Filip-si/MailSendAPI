@@ -17,7 +17,7 @@ namespace Infrastructure
 
     public DbSet<FileFooter> FileFooters { get; set; }
 
-    public DbSet<Files> Files { get; set; }
+    public DbSet<File> Files { get; set; }
 
     public DbSet<Template> Templates { get; set; }
   }

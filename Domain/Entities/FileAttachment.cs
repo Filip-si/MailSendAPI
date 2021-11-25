@@ -8,11 +8,11 @@ namespace Domain.Entities
     {
 
     }
-    public FileAttachment(string FileName, string ContentType, byte[] DataFiles)
+    public FileAttachment(string fileName, string contentType, byte[] dataFiles)
     {
-      this.FileName = FileName;
-      this.ContentType = ContentType;
-      this.DataFiles = DataFiles;
+      FileName = fileName;
+      ContentType = contentType;
+      DataFiles = dataFiles;
     }
 
     public Guid? FileAttachmentId { get; set; }
@@ -25,6 +25,6 @@ namespace Domain.Entities
 
     public Guid? FilesId { get; set; }
 
-    public virtual Files Files { get; set; }
+    public virtual File Files { get; set; }
   }
 }

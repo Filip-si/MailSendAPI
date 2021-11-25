@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Domain.Entities
 {
-  public class Files
+  public class File
   {
 
     public Guid? FilesId { get; set; }
